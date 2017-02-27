@@ -1,6 +1,5 @@
 package com.datametl.tasks;
 
-
 import org.json.JSONObject;
 /**
  * Created by archon on 2/10/17.
