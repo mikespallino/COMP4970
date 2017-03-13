@@ -16,7 +16,6 @@ import java.util.ArrayList;
  */
 public class RulesEngineTask implements Task {
 
-
     private JobState current_state = JobState.RUNNING;
     private SubJob parent = null;
     private JSONArray newHeader;
@@ -88,7 +87,6 @@ public class RulesEngineTask implements Task {
     }
 
     private int idiot(JSONObject pckt) {
-
         return 1;
     }
 
@@ -116,27 +114,6 @@ public class RulesEngineTask implements Task {
         }
 
         return sendback;
-    }
-    private static String hashString(String string, String typeOfHash){
-        try {
-            MessageDigest digest = MessageDigest.getInstance(typeOfHash);
-            byte[] hashedBytes = digest.digest(string.getBytes("UTF-8"));
-
-            return convertToHexString(hashedBytes);
-        } catch (NoSuchAlgorithmException ex) {
-            return "Could not generate hash from String" + ex;
-        } catch (UnsupportedEncodingException ex){
-            return "Could not generate hash from String" + ex;
-        }
-    }
-
-    private static String convertToHexString(byte[] arrayBytes) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < arrayBytes.length; i++) {
-            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
-                    .substring(1));
-        }
-        return stringBuffer.toString();
     }
 
     private JSONArray doTransformations(JSONObject transforms,JSONArray line) {
@@ -344,7 +321,6 @@ public class RulesEngineTask implements Task {
                         return false;
                     }
                 }
-
             }
             else if (curFilterSymbol.equals("LT")) {
                 if (filters.getJSONObject(curFilter).get("filter_value") instanceof String) {
