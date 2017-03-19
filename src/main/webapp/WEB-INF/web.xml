@@ -4,22 +4,29 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     version="2.4">
 
-    <display-name>Hello, World Application</display-name>
+    <display-name>DataMETL</display-name>
     <description>
-	This is a simple web application with a source code organization
-	based on the recommendations of the Application Developer's Guide.
+        An ETL system.
     </description>
 
-    <!--
     <servlet>
-        <servlet-name>HelloServlet</servlet-name>
-        <servlet-class>mypackage.Hello</servlet-class>
+        <servlet-name>CreateWorkflow</servlet-name>
+        <servlet-class>com.datametl.webapp.CreateWorkflow</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>HelloServlet</servlet-name>
-        <url-pattern>/hello</url-pattern>
+        <servlet-name>CreateWorkflow</servlet-name>
+        <url-pattern>/create</url-pattern>
     </servlet-mapping>
-    -->
+
+    <servlet>
+        <servlet-name>InProgress</servlet-name>
+        <servlet-class>com.datametl.webapp.InProgress</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>InProgress</servlet-name>
+        <url-pattern>/inprogress</url-pattern>
+    </servlet-mapping>
 
 </web-app>

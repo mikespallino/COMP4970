@@ -26,12 +26,12 @@
         </nav>
         <div class="conatiner">
             <div class="left">
-                <button class="accordion">Create New Worflow</button>
+                <button class="accordion">Create New Workflow</button>
                 <div class="panel_item">
                   <p>Lorem ipsum...</p>
                 </div>
 
-                <button class="accordion">In Progress Workflows</button>
+                <a href="/DataMETL/inprogress"><button class="accordion">In Progress Workflows</button></a>
                 <div class="panel_item">
                   <p>Lorem ipsum...</p>
                 </div>
@@ -40,6 +40,19 @@
                 <div class="panel_item">
                   <p>Lorem ipsum...</p>
                 </div>
+                <div class="panel_item">
+                    <p>Lorem ipsum...</p>
+                </div>
+                <div class="panel_item">
+                    <p>Lorem ipsum...</p>
+                </div>
+                <div class="panel_item">
+                    <p>Lorem ipsum...</p>
+                </div>
+                <div class="panel_item">
+                    <p>Lorem ipsum...</p>
+                </div>
+
 
                 <button class="accordion">Completed Workflows</button>
                 <div class="panel_item">
@@ -50,13 +63,91 @@
             <div class="right">
                 <div class="page">
                     <img src="static/images/DataMETL_logo.png" height="100" width="100"/>
-                    <p>LOL!</p>
+                    <form action="/DataMETL/createworkflow" method="post" class="form-inline">
+                        <div class="leftcolumnpage">
+                            <div class="datametlinputbox">
+                                <div class="form-group">
+                                    <h3>Source</h3>
+                                </div>
+                                <hr/>
+                                <div class="form-group">
+                                    Path: <input type="text" class="form-control" name="source" placeholder="/users/Tests/Data/identities.csv">
+                                </div>
+                                File Type: <select name="source_type" class="form-control">
+                                    <option value="csv">CSV</option>
+                                    <option value="xml">XML</option>
+                                    <option value="json">JSON</option>
+                                </select>
+                            </div>
+                            <div class="datametlinputbox">
+                                <div class="form-group">
+                                    <h3>Destination Data Storage System</h3>
+                                </div>
+                                <hr/>
+                                Type: <select name="destination_type" class="form-control">
+                                    <option value="mysql">MySQL</option>
+                                    <option value="postgres">PostgreSQL</option>
+                                    <option value="solr">Solr</option>
+                                    <option value="elasticsearch">ElasticSearch</option>
+                                </select>
+                                <div class="form-group">
+                                    Port: <input type="text" class="form-control" name="destination_port" placeholder="8080">
+                                </div>
+                                <div class="form-group">
+                                    Server Address: <input type="text" class="form-control" name="destination_ip" placeholder="192.168.30.2">
+                                </div>
+                                <div class="form-group">
+                                    Storage Location: <input type="text" class="form-control" name="destination_location" placeholder="clientinformation">
+                                </div>
+                                <div class="form-group">
+                                    Username: <input type="text" class="form-control" name="username" placeholder="dev22">
+                                </div>
+                                <div class="form-group">
+                                    Password: <input type="text" class="form-control" name="password" placeholder="d@t@M1n3">
+                                </div>
+                            </div>
+                            <div class="datametlinputbox">
+                                <div class="form-group">
+                                    <h3>Execution</h3>
+                                </div>
+                                <hr/>
+                                <button type="submit" class="btn btn-success">Run</button>
+                            </div>
+                        </div>
+                        <div class="rightcolumnpage">
+                            <div class="datametlinputbox">
+                                <div class="form-group">
+                                    <h3>Transformations</h3>
+                                    <button type="button" class="btn btn-primary inputbox-more" id="transform-new">New</button>
+                                </div>
+                                <hr/>
+                                <div id="transforms" style="overflow-y: scroll;max-height:75px;"></div>
+                            </div>
+                            <div class="datametlinputbox">
+                                <div class="form-group">
+                                    <h3>Mapping</h3>
+                                    <button type="button" class="btn btn-primary inputbox-more" id="mapping-new">New</button>
+                                </div>
+                                <hr/>
+                                <div id="mapping" style="overflow-y: scroll;max-height:75px;"></div>
+                            </div>
+                            <div class="datametlinputbox">
+                                <div class="form-group">
+                                    <h3>Filtering</h3>
+                                    <button type="button" class="btn btn-primary inputbox-more" id="filter-new">New</button>
+                                </div>
+                                <hr/>
+                                <div id="filters" style="overflow-y: scroll;max-height:75px;"></div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="static/js/bootstrap.min.js"></script>
+        <script src="static/js/accordion.js"></script>
         <script src="static/js/main.js"></script>
 
     <!--
