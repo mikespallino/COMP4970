@@ -25,8 +25,8 @@ public class JobManager implements Runnable {
                 "\t\"source\": {\n" +
                 "\t\t\"host_ip\": \"\",\n" +
                 "\t\t\"host_port\": 1234,\n" +
-                "\t\t\"path\": \"MOCK_DATA.csv\",\n" +
-                "\t\t\"file_type\": \"csv\"\n" +
+                "\t\t\"path\": \"MOCK_DATA.xml\",\n" +
+                "\t\t\"file_type\": \"xml\"\n" +
                 "\t},\n" +
                 "\t\"rules\": {\n" +
                 "\t\t\"transformations\": {\n" +

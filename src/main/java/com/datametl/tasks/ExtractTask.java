@@ -1,5 +1,6 @@
 package com.datametl.tasks;
 
+import com.ctc.wstx.exc.WstxUnexpectedCharException;
 import com.datametl.exception.JSONParsingException;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
@@ -9,6 +10,14 @@ import com.opencsv.CSVReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import java.io.*;
 import java.nio.channels.Channels;
 import java.util.*;
@@ -61,14 +70,13 @@ public class ExtractTask implements Task{
         Task rules = new RulesEngineTask();
         SubJob newRulesSubJob = new SubJob(rules);
 
-        // INFO: Give RulesEngine a copy and reset the contents
+//         INFO: Give RulesEngine a copy and reset the contents
         newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
         JSONArray empty = new JSONArray();
         etlPacket.getJSONObject("data").put("contents", empty);
 
-        boolean status = parent.getParent().addSubJob(newRulesSubJob);
+        //boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
-        readContent();
         returnCode = JobState.SUCCESS;
 
     }
@@ -129,7 +137,7 @@ public class ExtractTask implements Task{
 
             reader.close();
             inputETLPacket(); //Puts information to ETLPacket
-            this.etlPacket.put("current_byte_position", (this.lastBytePos-this.bytePos) + this.bytePos);
+            this.etlPacket.put("current_byte_position", (this.lastBytePos));
 
             //readContent();
         }catch(IOException e){
@@ -264,7 +272,7 @@ public class ExtractTask implements Task{
                 inputETLPacket();
             }
 
-            this.etlPacket.put("current_byte_position", (this.lastBytePos - this.bytePos)+this.bytePos);
+            this.etlPacket.put("current_byte_position", (this.lastBytePos));
             //readContent();
 
         }catch(IOException e){
@@ -306,18 +314,176 @@ public class ExtractTask implements Task{
 
     private void extractXML(){
         //TODO: Parse, Export to ETLPacket, send to Matt
+
+        int count=0;
+        BufferedReader buff;
+        RandomAccessFile raf = null;
+        String startString="";
+        boolean endReach = false;
+
         try{
-            File xmlFile = new File(this.filePath);
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            raf = new RandomAccessFile(new File(this.filePath),"r");
 
-            XmlMapper xmlMapper = new XmlMapper();
-            List entries = xmlMapper.readValue(xmlFile,List.class);
 
-            ObjectMapper jsonMapper = new ObjectMapper();
-            String json = jsonMapper.writeValueAsString(entries); //Converted entire file to JSON String
+            InputStream is = Channels.newInputStream(raf.getChannel());
+            InputStreamReader isr = new InputStreamReader(is);
+            buff = new BufferedReader(isr);
+            XMLEventReader eventReader = factory.createXMLEventReader(buff);
 
-        }catch(Exception e){
+//            byte[] something =new byte[(int) 150];
+//            try {
+//                raf.read(something);
+//            }catch(Exception ee){
+//            }
+//            System.out.println("SHIT - "+ new String(something));
+//            raf.seek(this.lastBytePos);
+//
+//            if(this.bytePos!=0){
+//                raf.seek(this.bytePos);
+//            }
 
+            ArrayList<Object> tempField = new ArrayList<Object>();
+            ArrayList<Object> tempRow = new ArrayList<Object>();
+
+
+            while(eventReader.hasNext()&&count<docToRead){
+
+                XMLEvent event = eventReader.nextEvent();
+
+                //System.out.println("KEEP PRINTING: "+raf.getFilePointer());
+                switch(event.getEventType()){
+
+                    //Since we cannot seek to position, we will loop through the document until it reaches to the bytePos
+                    case XMLStreamConstants.START_DOCUMENT:
+                        if(this.bytePos!=0){
+                            startString=(String)this.etlPacket.get("recordTag");
+                            while(event.getLocation().getCharacterOffset()+startString.getBytes().length<=this.bytePos){
+                                event=eventReader.nextEvent();
+                            }
+                        }
+                        break;
+                    case XMLStreamConstants.START_ELEMENT:
+                        //System.out.println("XML Start Element");
+                        StartElement startElement = event.asStartElement();
+                        String qName = startElement.getName().getLocalPart();
+                        //System.out.println(qName);
+                        if(this.etlPacket.has("rootTag")) {
+                            if (startString.equals("")) {
+                                startString = qName;
+                                if(!this.etlPacket.has("recordTag")) {
+                                    this.etlPacket.put("recordTag", qName);
+                                }
+                                break;
+                            }
+                            if(qName.equals(startString)){
+                                break;
+                            }
+                            tempField.add(qName);
+                        }else{
+                            this.etlPacket.put("rootTag", qName);
+
+
+                        }
+
+                        break;
+                    case XMLStreamConstants.CHARACTERS:
+                        //System.out.println("XML Character");
+                        Characters characters = event.asCharacters();
+                        //System.out.println("Characters Data: "+characters.getData());
+                        if(characters.getData().contains("\n")){
+                            break;
+                        }
+                        tempRow.add(characters.getData());
+                        break;
+                    case XMLStreamConstants.END_ELEMENT:
+                        //System.out.println("XML End Element");
+                        EndElement endElement = event.asEndElement();
+                        String eName = endElement.getName().getLocalPart();
+                        //System.out.println("End Element: "+eName);
+                        //System.out.println("Root End: "+this.etlPacket.get("rootTag"));
+                        if(eName.equals(startString)) {
+                            count++;
+
+                            if (this.fieldName.isEmpty()) {
+                                this.fieldName = tempField;
+                            }
+                            this.rows.add(tempRow);
+
+                            tempField = new ArrayList<Object>();
+                            tempRow = new ArrayList<Object>();
+
+                            //System.out.println("Field Name: " + this.fieldName);
+                            //System.out.println("Rows: " + this.rows);
+                        }else if(eName.equals(this.etlPacket.get("rootTag"))){
+                            endReach = true;
+
+                        }
+
+                        break;
+                    default:
+                        //System.out.println(event.getEventType());
+                        break;
+                }
+                //System.out.println("Start String: "+startString);
+                //System.out.println("Temp Field Name: " + tempField);
+                //System.out.println("Temp Rows: " + tempRow);
+                this.lastBytePos = event.getLocation().getCharacterOffset();
+
+                //getCharacterOffset sets to next element
+                //Adding offset of known element to lastBytePos
+                if(endReach||count>=docToRead){
+                    //System.out.println("\n\n\n\n--------------------------I REACHED HERE--------------------------\n\n\n\n");
+                    startString+="<>/";
+                    this.lastBytePos = event.getLocation().getCharacterOffset()+startString.getBytes().length;
+                    break;
+                }
+            }
+
+//            System.out.println(this.lastBytePos);
+//            byte[] something =new byte[(int) 150];
+//            try {
+//                raf.read(something);
+//            }catch(Exception ee){
+//            }
+//            System.out.println("SHIT - "+ new String(something));
+//            raf.seek(this.lastBytePos);
+
+            eventReader.close();
+            inputETLPacket(); //Puts information to ETLPacket
+            this.etlPacket.put("current_byte_position", (this.lastBytePos));
+
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }catch (XMLStreamException e){
+            byte[] something =new byte[(int) 150];
+            try {
+                raf.read(something);
+            }catch(Exception ee){
+            }
+            System.out.println("SHIT - "+ new String(something));
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
         }
+
+
+
+
+
+
+//        try{
+//            File xmlFile = new File(this.filePath);
+//
+//            XmlMapper xmlMapper = new XmlMapper();
+//            List entries = xmlMapper.readValue(xmlFile,List.class);
+//
+//            ObjectMapper jsonMapper = new ObjectMapper();
+//            String json = jsonMapper.writeValueAsString(entries); //Converted entire file to JSON String
+//
+//        }catch(Exception e){
+//
+//        }
     }
 
     private void inputETLPacket(){
@@ -337,6 +503,7 @@ public class ExtractTask implements Task{
 //        this.etlPacket.put("data",data);
 
         //System.out.println("INPUT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
+        readContent();
     }
 
     private void readContent(){
