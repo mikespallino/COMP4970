@@ -1,5 +1,6 @@
 package com.datametl.webapp;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -61,7 +62,7 @@ public class CreateWorkflow extends HttpServlet {
                 "\t\t\"storage_type\": null\n" +
                 "\t},\n" +
                 "\t\"data\": {\n" +
-                "\t\t\"source_header\": null,\n" +
+                "\t\t\"source_header\": \"\",\n" +
                 "\t\t\"destination_header\": null,\n" +
                 "\t\t\"contents\": [],\n" +
                 "\t}\n" +
@@ -70,7 +71,6 @@ public class CreateWorkflow extends HttpServlet {
         for(String key: requestParams.keySet()) {
             Object item = requestParams.get(key)[0];
             if (item.equals("")) {
-                System.out.println("Eat a dick");
                 item = JSONObject.NULL;
             }
             newRequestParams.put(key, item);
@@ -84,24 +84,41 @@ public class CreateWorkflow extends HttpServlet {
         etlPacket.getJSONObject("destination").put("username", newRequestParams.get("username"));
         etlPacket.getJSONObject("destination").put("password", newRequestParams.get("password"));
         etlPacket.getJSONObject("destination").put("storage_type", newRequestParams.get("destination_type"));
+        JSONArray destinationHeader = new JSONArray();
+        String header = (String) newRequestParams.get("destination_schema");
+        for(String s: header.split(",")) {
+            destinationHeader.put(s);
+        }
+        etlPacket.getJSONObject("data").put("destination_header", destinationHeader);
 
         //TODO: This isn't really good. It won't work if the user creates and deletes a lot in the UI
-        for (int i = 0; i < requestParams.size(); i++) {
+        int transformCount = 1;
+        int mappingCount = 1;
+        int filterCount = 1;
+
+        for (int i = 0; i < 300; i++) {
             if (requestParams.containsKey("transformSourceField" + i)) {
                 JSONObject transform = new JSONObject();
                 transform.put("source_column", newRequestParams.get("transformSourceField" + i));
                 transform.put("new_field", newRequestParams.get("transformDestinationField" + i));
                 transform.put("transform", ((String)newRequestParams.get("transformValueComp" + i)).toUpperCase() + " " + newRequestParams.get("transformValue" + i));
-                etlPacket.getJSONObject("rules").getJSONObject("transformations").put("transform" + i, transform);
-            } else if(requestParams.containsKey("mappingSourceField" + i)) {
+                etlPacket.getJSONObject("rules").getJSONObject("transformations").put("transform" + transformCount, transform);
+
+                transformCount++;
+            }
+            if(requestParams.containsKey("mappingSourceField" + i)) {
                 if (newRequestParams.get("mappingSourceField" + i) != JSONObject.NULL) {
                     etlPacket.getJSONObject("rules").getJSONObject("mappings").put((String) newRequestParams.get("mappingSourceField" + i), newRequestParams.get("mappingDestinationField" + i));
+                    mappingCount++;
                 }
-            } else if(requestParams.containsKey("filterSourceField" + i)) {
+            }
+            if(requestParams.containsKey("filterSourceField" + i)) {
                 JSONObject filter = new JSONObject();
                 filter.put("source_column", newRequestParams.get("filterSourceField" + i));
                 filter.put("equality_test", ((String)newRequestParams.get("filterValueComp" + i)).toUpperCase());
                 filter.put("filter_value", newRequestParams.get("filterValue" + i));
+                etlPacket.getJSONObject("rules").getJSONObject("filters").put("filter" + filterCount, filter);
+                filterCount++;
             }
         }
 

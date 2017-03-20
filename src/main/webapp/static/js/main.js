@@ -15,7 +15,7 @@ $(document).ready(function() {
       };
     }
 
-    var transformHtml = '<div class="form-group" id="transformGroup{0}"> \
+    var transformHtml = '<div class="form-group transformGroup" id="transformGroup{0}"> \
                              <input type="text" class="form-control" name="transformSourceField{0}" placeholder="Source Field"> \
                              <select class="form-control" name="transformValueComp{0}"> \
                                 <option value="mult">MULT</option> \
@@ -31,14 +31,14 @@ $(document).ready(function() {
                              <br> \
                          </div>';
 
-    var mappingHtml = '<div class="form-group" id="mappingGroup{0}"> \
+    var mappingHtml = '<div class="form-group mappingGroup" id="mappingGroup{0}"> \
                            <input type="text" class="form-control" name="mappingSourceField{0}" placeholder="Source Field"> \
                            <input type="text" class="form-control" name="mappingDestinationField{0}" placeholder="Destination Field"> \
                            <button type="button" class="glyphicon glyphicon-remove-circle" id="mappingCancel{0}"></button> \
                            <br> \
                        </div>';
 
-    var filterHtml = '<div class="form-group" id="filterGroup{0}"> \
+    var filterHtml = '<div class="form-group filterGroup" id="filterGroup{0}"> \
                         <input type="text" class="form-control" name="filterSourceField{0}" placeholder="Source Field"> \
                         <select class="form-control" name="filterValueComp{0}"> \
                             <option value="eq">==</option> \

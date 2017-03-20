@@ -75,7 +75,7 @@ public class ExtractTask implements Task{
         JSONArray empty = new JSONArray();
         etlPacket.getJSONObject("data").put("contents", empty);
 
-        //boolean status = parent.getParent().addSubJob(newRulesSubJob);
+        boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
         returnCode = JobState.SUCCESS;
 
