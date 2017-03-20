@@ -84,14 +84,41 @@ $(document).ready(function() {
     $('#inProgressButton').click(function () {
         if ($('#inProgressButton').hasClass('active')) {
             $.ajax({
-                        url: "/DataMETL/inprogress",
+                        url: "/DataMETL/getworkflows",
                         success: function(result){
                                     alert(result);
                                  },
+                        data: {'status': 'RUNNING'},
                         type: "GET"
                    });
         }
     });
+
+    $('#completeButton').click(function () {
+            if ($('#completeButton').hasClass('active')) {
+                $.ajax({
+                            url: "/DataMETL/getworkflows",
+                            success: function(result){
+                                        alert(result);
+                                     },
+                            data: {'status': 'SUCCESS'},
+                            type: "GET"
+                       });
+            }
+    });
+
+    $('#failedButton').click(function () {
+                if ($('#failedButton').hasClass('active')) {
+                    $.ajax({
+                                url: "/DataMETL/getworkflows",
+                                success: function(result){
+                                            alert(result);
+                                         },
+                                data: {'status': 'FAILED'},
+                                type: "GET"
+                           });
+                }
+        });
 
     function makeTransformCancelButtonFunction(count) {
         $('#transformCancel' + count).click(function () {
