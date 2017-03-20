@@ -79,5 +79,10 @@ h3 {
 }
 
 button.inputbox-more {
-    float: right;
+    margin-top: 20px;
+}
+
+div.datametl-scrollbox {
+    overflow-y: scroll;
+    max-height:90px;
 }

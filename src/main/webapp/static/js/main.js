@@ -2,84 +2,112 @@ $(document).ready(function() {
     var transformCount = 0;
     var mappingCount = 0;
     var filterCount = 0;
-    $('#transform-new').click(function () {
-        var addContent = "<div class='form-group'>";
-        addContent += "<input type='text' class='form-control' id='transformSourceField" + transformCount + "' name='transformSourceField" + transformCount + "' placeholder='Source Field'>";
-        addContent += "<select class='form-control' id='transformValueComp" + transformCount + "' name='transformValueComp" + transformCount + "'>";
-        addContent += "<option value='mult'>MULT</option>";
-        addContent += "<option value='div'>DIV</option>";
-        addContent += "<option value='pow'>POW</option>";
-        addContent += "<option value='add'>ADD</option>";
-        addContent += "<option value='sub'>SUB</option>";
-        addContent += "<option value='hash'>HASH</option>";
-        addContent +=  "</select>";
-        addContent += "<input type='text' class='form-control' id='transformValue" + transformCount + "' name='transformValue" + transformCount + "' placeholder='Value'>";
-        addContent += "<input type='text' class='form-control' id='transformDestinationField" + transformCount + "' name='transformDestinationField" + transformCount + "' placeholder='New Field (optional)'>";
-        addContent += "<button type='button' class='glyphicon glyphicon-remove-circle' id='transformCancel" + transformCount + "'></button";
-        addContent += "</div>";
-        addContent += "<br>";
 
-        $(addContent).appendTo('#transforms');
+    if (!String.prototype.format) {
+      String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+          ;
+        });
+      };
+    }
+
+    var transformHtml = '<div class="form-group" id="transformGroup{0}"> \
+                             <input type="text" class="form-control" name="transformSourceField{0}" placeholder="Source Field"> \
+                             <select class="form-control" name="transformValueComp{0}"> \
+                                <option value="mult">MULT</option> \
+                                <option value="div">DIV</option> \
+                                <option value="pow">POW</option> \
+                                <option value="add">ADD</option> \
+                                <option value="sub">SUB</option> \
+                                <option value="hash">HASH</option> \
+                             </select> \
+                             <input type="text" class="form-control" name="transformValue{0}" placeholder="Value"> \
+                             <input type="text" class="form-control" name="transformDestinationField{0}" placeholder="New Field (optional)"> \
+                             <button type="button" class="glyphicon glyphicon-remove-circle" id="transformCancel{0}"></button> \
+                             <br> \
+                         </div>';
+
+    var mappingHtml = '<div class="form-group" id="mappingGroup{0}"> \
+                           <input type="text" class="form-control" name="mappingSourceField{0}" placeholder="Source Field"> \
+                           <input type="text" class="form-control" name="mappingDestinationField{0}" placeholder="Destination Field"> \
+                           <button type="button" class="glyphicon glyphicon-remove-circle" id="mappingCancel{0}"></button> \
+                           <br> \
+                       </div>';
+
+    var filterHtml = '<div class="form-group" id="filterGroup{0}"> \
+                        <input type="text" class="form-control" name="filterSourceField{0}" placeholder="Source Field"> \
+                        <select class="form-control" name="filterValueComp{0}"> \
+                            <option value="eq">==</option> \
+                            <option value="gt">></option> \
+                            <option value="lt"><</option> \
+                        </select> \
+                        <input type="text" class="form-control" name="filterValue{0}" placeholder="Value"> \
+                        <button type="button" class="glyphicon glyphicon-remove-circle" id="filterCancel{0}"></button> \
+                        <br> \
+                      </div>';
+
+
+    $('#transform-new').click(function () {
+        $(transformHtml.format(transformCount)).appendTo('#transforms');
 
         makeTransformCancelButtonFunction(transformCount);
         transformCount++;
     });
 
     $('#mapping-new').click(function () {
-        var addContent = "<div class='form-group'>";
-        addContent += "<input type='text' class='form-control' id='mappingSourceField" + mappingCount + "' name='mappingSourceField" + mappingCount + "' placeholder='Source Field'>";
-        addContent += "<input type='text' class='form-control' id='mappingDestinationField" + mappingCount + "' name='mappingDestinationField" + mappingCount + "' placeholder='Destination Field'>";
-        addContent += "<button type='button' class='glyphicon glyphicon-remove-circle' id='mappingCancel" + mappingCount + "'></button";
-        addContent += "</div>";
-        addContent += "<br>";
-
-        $(addContent).appendTo('#mapping');
+        $(mappingHtml.format(mappingCount)).appendTo('#mapping');
         makeMappingCancelButtonFunction(mappingCount);
         mappingCount++;
     });
 
     $('#filter-new').click(function () {
-        var addContent = "<div class='form-group'>";
-        addContent += "<input type='text' class='form-control' id='filterSourceField" + filterCount + "' name='filterSourceField" + filterCount + "' placeholder='Source Field'>";
-        addContent += "<select class='form-control' id='filterValueComp" + filterCount + "' name='filterValueComp" + filterCount + "'>";
-        addContent += "<option value='eq'>==</option>";
-        addContent += "<option value='gt'>></option>";
-        addContent += "<option value='lt'><</option>";
-        addContent +=  "</select>";
-        addContent += "<input type='text' class='form-control' id='filterValue" + filterCount + "' name='filterValue" + filterCount + "' placeholder='Value'>";
-        addContent += "<button type='button' class='glyphicon glyphicon-remove-circle' id='filterCancel" + filterCount + "'></button";
-        addContent += "</div>";
-        addContent += "<br>";
-
-        $(addContent).appendTo('#filters');
+        $(filterHtml.format(filterCount)).appendTo('#filters');
         makeFilterCancelButtonFunction(filterCount);
         filterCount++;
     });
 
+    $('#executeButton').click(function () {
+        $.ajax({
+                    url: "/DataMETL/createworkflow",
+                    success: function(result){
+                                alert(result);
+                             },
+                    data: $("#createWorkflowForm").serialize(),
+                    type: "POST"
+               });
+    });
+
+    $('#inProgressButton').click(function () {
+        if ($('#inProgressButton').hasClass('active')) {
+            $.ajax({
+                        url: "/DataMETL/inprogress",
+                        success: function(result){
+                                    alert(result);
+                                 },
+                        type: "GET"
+                   });
+        }
+    });
+
     function makeTransformCancelButtonFunction(count) {
         $('#transformCancel' + count).click(function () {
-            $('#transformSourceField' + count).remove();
-            $('#transformValueComp' + count).remove();
-            $('#transformValue' + count).remove();
-            $('#transformDestinationField' + count).remove();
-            $('#transformCancel' + count).remove();
+            $('#transformGroup' + count).remove();
         });
     }
 
     function makeMappingCancelButtonFunction(count) {
         $('#mappingCancel' + count).click(function () {
-            $('#mappingSourceField' + count).remove();
-            $('#mappingDestinationField' + count).remove();
-            $('#mappingCancel' + count).remove();
+            $('#mappingGroup' + count).remove();
         });
     }
 
     function makeFilterCancelButtonFunction(count) {
             $('#filterCancel' + count).click(function () {
-                $('#filterSourceField' + count).remove();
-                $('#filterValueComp' + count).remove();
-                $('#filterValue' + count).remove();
-                $('#filterCancel' + count).remove();
+                $('#filterGroup' + count).remove();
             });
     }
 
