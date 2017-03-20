@@ -1,11 +1,17 @@
 package com.datametl.webapp;
 
+import com.datametl.jobcontrol.Job;
+import org.json.JSONObject;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Servlet implementation class FileCounter
@@ -16,7 +22,17 @@ public class InProgress extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException {
+                         HttpServletResponse response) throws ServletException, IOException {
+        Map<UUID, Job> jobs = Index.manager.getJobs();
+        JSONObject statusJson = new JSONObject();
+
+        //TODO: Return everything later
+        for(UUID id: jobs.keySet()) {
+            statusJson.put(id.toString(), jobs.get(id).getState());
+        }
+
+        PrintWriter out = response.getWriter();
+        out.println(statusJson.toString());
     }
 
 

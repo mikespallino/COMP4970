@@ -14,19 +14,15 @@
         <servlet-class>com.datametl.webapp.CreateWorkflow</servlet-class>
     </servlet>
 
-    <servlet-mapping>
-        <servlet-name>CreateWorkflow</servlet-name>
-        <url-pattern>/create</url-pattern>
-    </servlet-mapping>
-
     <servlet>
         <servlet-name>InProgress</servlet-name>
         <servlet-class>com.datametl.webapp.InProgress</servlet-class>
     </servlet>
 
-    <servlet-mapping>
-        <servlet-name>InProgress</servlet-name>
-        <url-pattern>/inprogress</url-pattern>
-    </servlet-mapping>
+    <servlet>
+        <servlet-name>Index</servlet-name>
+        <servlet-class>com.datametl.webapp.Index</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 
 </web-app>
