@@ -82,13 +82,7 @@ public class CreateWorkflow extends HttpServlet {
 
         //TODO: Get the destination header
 
-        Vector<SubJob> subJobs = new Vector<SubJob>();
-        Task dst = new DataSegmentationTask(250);
-        SubJob dstSubJob = new SubJob(dst);
-        subJobs.add(dstSubJob);
-        Job job = new Job(subJobs, 3);
-
-        UUID id = Index.manager.addJob(job, etlPacket);
+        UUID id = Index.manager.addJob(etlPacket);
         Index.manager.startJob(id);
     }
 

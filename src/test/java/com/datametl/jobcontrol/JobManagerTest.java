@@ -16,19 +16,10 @@ import static org.junit.Assert.*;
  * Created by mspallino on 2/2/17.
  */
 public class JobManagerTest {
-
-    private Vector<SubJob> subJobs;
-    private Job job;
     private JSONObject etlPacket;
 
     @Before
     public void setUp() throws Exception {
-        subJobs = new Vector<SubJob>();
-        for(int i = 0; i < 3; ++i) {
-            subJobs.add(new SubJob(new ExampleTask()));
-        }
-
-        this.job = new Job(this.subJobs, 3);
 
         String emptyPacketData = "{\n" +
                 "\t\"source\": {\n" +
@@ -86,12 +77,12 @@ public class JobManagerTest {
     @Test
     public void addJob() throws Exception {
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(job, this.etlPacket);
+        UUID jobId = manager.addJob(this.etlPacket);
         boolean started = manager.startJob(jobId);
         assertTrue(started);
 
         setUp();
-        UUID newJobId = manager.addJob(job, this.etlPacket);
+        UUID newJobId = manager.addJob(this.etlPacket);
         boolean newJobStarted = manager.startJob(newJobId);
         assertTrue(newJobStarted);
 
@@ -105,7 +96,7 @@ public class JobManagerTest {
     @Test
     public void removeJob() throws Exception {
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(job, this.etlPacket);
+        UUID jobId = manager.addJob(this.etlPacket);
         boolean started = manager.startJob(jobId);
         assertTrue(started);
         manager.removeJob(jobId);
@@ -115,15 +106,7 @@ public class JobManagerTest {
     public void  getETLPacket() throws Exception {
         //TODO: we can do better
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(job, this.etlPacket);
-
-        JSONObject packet = job.getETLPacket();
-        System.out.println(packet);
-
-        assertNotNull(packet.getJSONObject("data"));
-        assertNotNull(packet.get("source"));
-        assertNotNull(packet.get("rules"));
-        assertNotNull(packet.get("destination"));
+        UUID jobId = manager.addJob(this.etlPacket);
 
         JSONObject managerPacket = manager.getJobETLPacket(jobId);
         System.out.println(managerPacket);

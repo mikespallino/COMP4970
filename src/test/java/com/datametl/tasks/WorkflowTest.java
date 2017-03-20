@@ -73,20 +73,14 @@ public class WorkflowTest {
                 "\t}\n" +
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
-
-        Vector<SubJob> subJobs = new Vector<SubJob>();
-        Task dst = new DataSegmentationTask(250);
-        SubJob dstSubJob = new SubJob(dst);
-        subJobs.add(dstSubJob);
-        Job job = new Job(subJobs, 3);
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(job, etlPacket);
+        UUID jobId = manager.addJob(etlPacket);
 
         manager.startJob(jobId);
         manager.stopJob(jobId);
 
         Thread.sleep(2000);
-        assertEquals(job.getState(), JobState.SUCCESS);
+        assertEquals(manager.getJobState(jobId), JobState.SUCCESS);
     }
 
 }

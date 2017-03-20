@@ -1,6 +1,9 @@
 package com.datametl.jobcontrol;
 
 import java.util.*;
+
+import com.datametl.tasks.DataSegmentationTask;
+import com.datametl.tasks.Task;
 import org.json.*;
 
 
@@ -19,10 +22,16 @@ public class JobManager implements Runnable {
     }
 
     //Path & file type has been altered
-    public UUID addJob(Job newJob, JSONObject uiData) {
+    public UUID addJob(JSONObject uiData) {
+        Vector<SubJob> subJobs = new Vector<SubJob>();
+        Task dst = new DataSegmentationTask(250);
+        SubJob dstSubJob = new SubJob(dst);
+        subJobs.add(dstSubJob);
+        Job job = new Job(subJobs, 3);
+
         UUID newId = UUID.randomUUID();
-        newJob.setETLPacket(uiData);
-        jobs.put(newId, newJob);
+        job.setETLPacket(uiData);
+        jobs.put(newId, job);
         return newId;
     }
 
@@ -112,5 +121,9 @@ public class JobManager implements Runnable {
 
     public Map<UUID, Job> getJobs() {
         return jobs;
+    }
+
+    public JobState getJobState(UUID id) {
+        return jobs.get(id).getState();
     }
 }
