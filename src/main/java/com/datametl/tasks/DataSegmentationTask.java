@@ -26,7 +26,14 @@ public class DataSegmentationTask implements Task {
     public void apply() {
         returnCode = JobState.RUNNING;
         JSONObject etlPacket = parent.getETLPacket();
-        String filePath = etlPacket.getJSONObject("source").getString("path");
+        Object path = etlPacket.getJSONObject("source").get("path");
+        String filePath;
+        if (path == null || path == JSONObject.NULL) {
+            returnCode = JobState.FAILED;
+            throw new RuntimeException("Could not find file!");
+        } else {
+            filePath = (String) path;
+        }
         File fin = new File(filePath);
         if (fin.exists() == false) {
             returnCode = JobState.FAILED;

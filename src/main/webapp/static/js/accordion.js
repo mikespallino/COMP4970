@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var acc = document.getElementsByClassName("accordion");
+    var acc = document.getElementsByClassName("usable-accordion");
     var i;
 
     for (i = 0; i < acc.length; i++) {

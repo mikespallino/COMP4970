@@ -1,0 +1,88 @@
+<form method="post" class="form-inline" id="createWorkflowForm">
+    <div class="leftcolumnpage">
+        <div class="datametlinputbox" id="source-config">
+            <div class="form-group">
+                <h3>Source</h3>
+            </div>
+            <hr/>
+            <div class="form-group">
+                Path: <input type="text" class="form-control" name="source" id="source" placeholder="/users/Tests/Data/identities.csv">
+            </div>
+            File Type: <select name="source_type" id="source_type" class="form-control">
+            <option value="csv">CSV</option>
+            <option value="xml">XML</option>
+            <option value="json">JSON</option>
+        </select>
+        </div>
+        <div class="datametlinputbox" id="destination-config">
+            <div class="form-group">
+                <h3>Destination Data Storage System</h3>
+            </div>
+            <hr/>
+            Type: <select name="destination_type" id="destination_type"class="form-control">
+                <option value="mysql">MySQL</option>
+                <option value="postgres">PostgreSQL</option>
+                <option value="solr">Solr</option>
+                <option value="elasticsearch">ElasticSearch</option>
+            </select>
+            <div class="form-group">
+                Port: <input type="text" class="form-control" name="destination_port" id="destination_port"placeholder="8080">
+            </div>
+            <div class="form-group">
+                Server Address: <input type="text" class="form-control" name="destination_ip" id="destination_ip" placeholder="192.168.30.2">
+            </div>
+            <div class="form-group">
+                Storage Location: <input type="text" class="form-control" name="destination_location" id="destination_location" placeholder="clientinformation">
+            </div>
+            <div class="form-group">
+                Storage Schema: <input type="text" class="form-control" name="destination_schema" id="destination_schema" placeholder="rowNum,firstName,email">
+            </div>
+            <div class="form-group">
+                Username: <input type="text" class="form-control" name="username" id="username" placeholder="dev22">
+            </div>
+            <div class="form-group">
+                Password: <input type="text" class="form-control" name="password" id="password" placeholder="d@t@M1n3">
+            </div>
+        </div>
+        <div class="datametlinputbox" id="execution-config">
+            <div class="form-group">
+                <h3>Execution</h3>
+            </div>
+            <hr/>
+            <div class="form-group">
+                Time: <input type="text" class="form-control" name="time" id="time"placeholder="12:00">
+            </div>
+            <div class="form-group">
+                Schedule: <input type="text" class="form-control" name="schedule" id="schedule" placeholder="MTWRF">
+            </div>
+            <button type="button" class="btn btn-success" id="executeButton" style="float:right;">Run</button>
+        </div>
+    </div>
+    <div class="rightcolumnpage">
+        <div class="datametlinputbox">
+            <div class="form-group">
+                <h3>Transformations</h3>
+                <button type="button" class="btn btn-primary inputbox-more" id="transform-new" style="margin-left: 450px;">New</button>
+            </div>
+            <hr/>
+            <div id="transforms" class="datametl-scrollbox"></div>
+        </div>
+        <div class="datametlinputbox">
+            <div class="form-group">
+                <h3>Mapping</h3>
+                <button type="button" class="btn btn-primary inputbox-more" id="mapping-new" style="margin-left: 530px;">New</button>
+            </div>
+            <hr/>
+            <div id="mapping" class="datametl-scrollbox"></div>
+        </div>
+        <div class="datametlinputbox">
+            <div class="form-group">
+                <h3>Filtering</h3>
+                <button type="button" class="btn btn-primary inputbox-more" id="filter-new" style="margin-left: 530px;">New</button>
+            </div>
+            <hr/>
+            <div id="filters" class="datametl-scrollbox"></div>
+        </div>
+    </div>
+</form>
+<script src="static/js/main.js"></script>

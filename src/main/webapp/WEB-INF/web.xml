@@ -15,8 +15,8 @@
     </servlet>
 
     <servlet>
-        <servlet-name>InProgress</servlet-name>
-        <servlet-class>com.datametl.webapp.InProgress</servlet-class>
+        <servlet-name>GetWorkflows</servlet-name>
+        <servlet-class>com.datametl.webapp.GetWorkflows</servlet-class>
     </servlet>
 
     <servlet>
