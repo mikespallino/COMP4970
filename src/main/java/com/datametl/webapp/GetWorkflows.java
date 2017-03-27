@@ -28,34 +28,50 @@ public class GetWorkflows extends HttpServlet {
         JSONObject statusJson = new JSONObject();
 
         String requestedStatus = request.getParameter("status");
+        String requestedJob = request.getParameter("jobid");
+
         JobState state = null;
         PrintWriter out = response.getWriter();
 
-        if(requestedStatus.equals("RUNNING")) {
-            state = JobState.RUNNING;
-        } else if(requestedStatus.equals("SUCCESS")) {
-            state = JobState.SUCCESS;
-        } else if(requestedStatus.equals("FAILED")) {
-            state = JobState.FAILED;
+        if(requestedStatus != null) {
+            System.out.println("Checking status: " + requestedStatus);
+            if (requestedStatus.equals("RUNNING")) {
+                state = JobState.RUNNING;
+            } else if (requestedStatus.equals("SUCCESS")) {
+                state = JobState.SUCCESS;
+            } else if (requestedStatus.equals("FAILED")) {
+                state = JobState.FAILED;
+            } else {
+                response.setStatus(400);
+                out.println("{\"error\": \"Invalid status check.\"}");
+                return;
+            }
+            for(UUID id: jobs.keySet()) {
+                if (state == JobState.FAILED) {
+                    if (jobs.get(id).getState() == state || jobs.get(id).getState() == JobState.KILLED) {
+                        JSONObject obj = new JSONObject();
+
+                        obj.put("status", jobs.get(id).getState());
+                        statusJson.put(id.toString(), obj);
+                    }
+                } else {
+                    if (jobs.get(id).getState() == state) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("status", jobs.get(id).getState());
+                        statusJson.put(id.toString(), obj);
+                    }
+                }
+            }
+            out.println(statusJson.toString());
+        } else if (requestedJob != null) {
+            UUID jobId = UUID.fromString(requestedJob);
+            out.println(jobs.get(jobId).getETLPacket().toString());
+            return;
         } else {
             response.setStatus(400);
             out.println("{\"error\": \"Invalid status check.\"}");
             return;
         }
-
-        //TODO: Return everything later
-        for(UUID id: jobs.keySet()) {
-            if (state == JobState.FAILED) {
-                if (jobs.get(id).getState() == state || jobs.get(id).getState() == JobState.KILLED) {
-                    statusJson.put(id.toString(), jobs.get(id).getState());
-                }
-            } else {
-                if (jobs.get(id).getState() == state) {
-                    statusJson.put(id.toString(), jobs.get(id).getState());
-                }
-            }
-        }
-        out.println(statusJson.toString());
     }
 
 

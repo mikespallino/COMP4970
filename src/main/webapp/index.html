@@ -26,29 +26,25 @@
         </nav>
         <div class="conatiner">
             <div class="left">
-                <button class="accordion">Create New Workflow</button>
+                <button class="accordion" id="createButton">Create New Workflow</button>
                 <div class="panel_item">
-                  <p>Lorem ipsum...</p>
                 </div>
 
-                <button class="accordion" id="inProgressButton">In Progress Workflows</button>
-                <div class="panel_item">
-                  <p>Lorem ipsum...</p>
+                <button class="usable-accordion accordion" id="inProgressButton">In Progress Workflows</button>
+                <div class="panel_item" id="inProgressLocation">
                 </div>
 
-                <button class="accordion" id="failedButton">Failed Workflows</button>
-                <div class="panel_item">
-                    <p>Lorem ipsum...</p>
+                <button class="usable-accordion accordion" id="failedButton">Failed Workflows</button>
+                <div class="panel_item" id="failedLocation">
                 </div>
 
-                <button class="accordion" id="completeButton">Completed Workflows</button>
-                <div class="panel_item">
-                  <p>Lorem ipsum...</p>
+                <button class="usable-accordion accordion" id="completeButton">Completed Workflows</button>
+                <div class="panel_item" id="completeLocation">
                 </div>
             </div>
 
             <div class="right">
-                <div class="page">
+                <div id="datametl-page">
                     <form method="post" class="form-inline" id="createWorkflowForm">
                         <div class="leftcolumnpage">
                             <div class="datametlinputbox">
@@ -60,10 +56,10 @@
                                     Path: <input type="text" class="form-control" name="source" placeholder="/users/Tests/Data/identities.csv">
                                 </div>
                                 File Type: <select name="source_type" class="form-control">
-                                    <option value="csv">CSV</option>
-                                    <option value="xml">XML</option>
-                                    <option value="json">JSON</option>
-                                </select>
+                                <option value="csv">CSV</option>
+                                <option value="xml">XML</option>
+                                <option value="json">JSON</option>
+                            </select>
                             </div>
                             <div class="datametlinputbox">
                                 <div class="form-group">
@@ -71,11 +67,11 @@
                                 </div>
                                 <hr/>
                                 Type: <select name="destination_type" class="form-control">
-                                    <option value="mysql">MySQL</option>
-                                    <option value="postgres">PostgreSQL</option>
-                                    <option value="solr">Solr</option>
-                                    <option value="elasticsearch">ElasticSearch</option>
-                                </select>
+                                <option value="mysql">MySQL</option>
+                                <option value="postgres">PostgreSQL</option>
+                                <option value="solr">Solr</option>
+                                <option value="elasticsearch">ElasticSearch</option>
+                            </select>
                                 <div class="form-group">
                                     Port: <input type="text" class="form-control" name="destination_port" placeholder="8080">
                                 </div>
@@ -109,7 +105,7 @@
                                 <button type="button" class="btn btn-success" id="executeButton" style="float:right;">Run</button>
                             </div>
                         </div>
-                        <div class="rightcolumnpage">
+                        <div class="rightcolumnpage" id="rightcolumnpage">
                             <div class="datametlinputbox">
                                 <div class="form-group">
                                     <h3>Transformations</h3>

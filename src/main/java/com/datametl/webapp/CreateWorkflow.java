@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,9 +84,15 @@ public class CreateWorkflow extends HttpServlet {
         etlPacket.getJSONObject("destination").put("password", newRequestParams.get("password"));
         etlPacket.getJSONObject("destination").put("storage_type", newRequestParams.get("destination_type"));
         JSONArray destinationHeader = new JSONArray();
-        String header = (String) newRequestParams.get("destination_schema");
-        for(String s: header.split(",")) {
-            destinationHeader.put(s);
+        Object objHeader = newRequestParams.get("destination_schema");
+        String header;
+        if (objHeader != JSONObject.NULL) {
+            header = (String) objHeader;
+            for(String s: header.split(",")) {
+                destinationHeader.put(s);
+            }
+        } else {
+            destinationHeader.put(objHeader);
         }
         etlPacket.getJSONObject("data").put("destination_header", destinationHeader);
 
@@ -101,29 +106,26 @@ public class CreateWorkflow extends HttpServlet {
                 JSONObject transform = new JSONObject();
                 transform.put("source_column", newRequestParams.get("transformSourceField" + i));
                 transform.put("new_field", newRequestParams.get("transformDestinationField" + i));
-                transform.put("transform", ((String)newRequestParams.get("transformValueComp" + i)).toUpperCase() + " " + newRequestParams.get("transformValue" + i));
+                transform.put("transform", ((String) newRequestParams.get("transformValueComp" + i)).toUpperCase() + " " + newRequestParams.get("transformValue" + i));
                 etlPacket.getJSONObject("rules").getJSONObject("transformations").put("transform" + transformCount, transform);
 
                 transformCount++;
             }
-            if(requestParams.containsKey("mappingSourceField" + i)) {
+            if (requestParams.containsKey("mappingSourceField" + i)) {
                 if (newRequestParams.get("mappingSourceField" + i) != JSONObject.NULL) {
                     etlPacket.getJSONObject("rules").getJSONObject("mappings").put((String) newRequestParams.get("mappingSourceField" + i), newRequestParams.get("mappingDestinationField" + i));
                     mappingCount++;
                 }
             }
-            if(requestParams.containsKey("filterSourceField" + i)) {
+            if (requestParams.containsKey("filterSourceField" + i)) {
                 JSONObject filter = new JSONObject();
                 filter.put("source_column", newRequestParams.get("filterSourceField" + i));
-                filter.put("equality_test", ((String)newRequestParams.get("filterValueComp" + i)).toUpperCase());
+                filter.put("equality_test", ((String) newRequestParams.get("filterValueComp" + i)).toUpperCase());
                 filter.put("filter_value", newRequestParams.get("filterValue" + i));
                 etlPacket.getJSONObject("rules").getJSONObject("filters").put("filter" + filterCount, filter);
                 filterCount++;
             }
         }
-
-
-        //TODO: Get the destination header
 
         UUID id = Index.manager.addJob(etlPacket);
         Index.manager.startJob(id);
