@@ -98,7 +98,6 @@ public class CreateWorkflow extends HttpServlet {
 
         //TODO: This isn't really good. It won't work if the user creates and deletes a lot in the UI
         int transformCount = 1;
-        int mappingCount = 1;
         int filterCount = 1;
 
         for (int i = 0; i < 300; i++) {
@@ -114,7 +113,6 @@ public class CreateWorkflow extends HttpServlet {
             if (requestParams.containsKey("mappingSourceField" + i)) {
                 if (newRequestParams.get("mappingSourceField" + i) != JSONObject.NULL) {
                     etlPacket.getJSONObject("rules").getJSONObject("mappings").put((String) newRequestParams.get("mappingSourceField" + i), newRequestParams.get("mappingDestinationField" + i));
-                    mappingCount++;
                 }
             }
             if (requestParams.containsKey("filterSourceField" + i)) {
@@ -127,7 +125,18 @@ public class CreateWorkflow extends HttpServlet {
             }
         }
 
-        UUID id = Index.manager.addJob(etlPacket);
+        String name = requestParams.get("name")[0];
+        //INFO: We can't have spaces in names
+        name = name.replace(" ", "_");
+        etlPacket.put("schedule", requestParams.get("schedule")[0]);
+        etlPacket.put("time", requestParams.get("time")[0]);
+        etlPacket.put("name", name);
+
+        UUID id = Index.manager.addJob(name, etlPacket);
+        if (id == null) {
+            response.sendError(400, "Job name already in use!");
+            return;
+        }
         Index.manager.startJob(id);
     }
 

@@ -76,8 +76,11 @@ $(document).ready(function() {
         $.ajax({
                     url: "/DataMETL/createworkflow",
                     success: function(result){
-                                //alert(result);
+                                alert("Job is now running!");
                              },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            alert("ERROR: A Job with than name already exists!");
+                           },
                     data: $("#createWorkflowForm").serialize(),
                     type: "POST"
                });

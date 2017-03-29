@@ -13,16 +13,20 @@ import org.json.*;
 public class JobManager implements Runnable {
 
     private Map<UUID, Job> jobs;
+    private Map<String, UUID> namedJobs;
     private Thread curThread;
+    private Scheduler scheduler;
 
     public JobManager() {
         jobs = new HashMap<UUID, Job>();
+        namedJobs = new HashMap<String, UUID>();
+        scheduler = new Scheduler();
         curThread = new Thread(this);
         curThread.start();
     }
 
     //Path & file type has been altered
-    public UUID addJob(JSONObject uiData) {
+    public UUID addJob(String name, JSONObject uiData) {
         Vector<SubJob> subJobs = new Vector<SubJob>();
         Task dst = new DataSegmentationTask(250);
         SubJob dstSubJob = new SubJob(dst);
@@ -31,7 +35,18 @@ public class JobManager implements Runnable {
 
         UUID newId = UUID.randomUUID();
         job.setETLPacket(uiData);
+        if (name.equals("")) {
+            name = newId.toString();
+        }
+
+        for(String n : namedJobs.keySet()) {
+            if (name.equals(n)) {
+                return null;
+            }
+        }
+        namedJobs.put(name, newId);
         jobs.put(newId, job);
+        scheduler.saveWorkflow(newId, uiData);
         return newId;
     }
 
@@ -125,5 +140,26 @@ public class JobManager implements Runnable {
 
     public JobState getJobState(UUID id) {
         return jobs.get(id).getState();
+    }
+
+    public Job getJobByName(String name) {
+        return jobs.get(namedJobs.get(name));
+    }
+
+    public Map<String, UUID> getNamedJobs() {
+        return namedJobs;
+    }
+
+    public void resubmit(UUID jobid, JSONObject packet) {
+        removeJob(jobid);
+
+        Vector<SubJob> subJobs = new Vector<SubJob>();
+        Task dst = new DataSegmentationTask(250);
+        SubJob dstSubJob = new SubJob(dst);
+        subJobs.add(dstSubJob);
+        Job job = new Job(subJobs, 3);
+        job.setETLPacket(packet);
+
+        jobs.put(jobid, job);
     }
 }
