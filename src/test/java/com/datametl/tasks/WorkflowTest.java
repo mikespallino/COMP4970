@@ -74,7 +74,7 @@ public class WorkflowTest {
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(etlPacket);
+        UUID jobId = manager.addJob("", etlPacket);
 
         manager.startJob(jobId);
         manager.stopJob(jobId);

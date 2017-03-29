@@ -77,12 +77,12 @@ public class JobManagerTest {
     @Test
     public void addJob() throws Exception {
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(this.etlPacket);
+        UUID jobId = manager.addJob("", this.etlPacket);
         boolean started = manager.startJob(jobId);
         assertTrue(started);
 
         setUp();
-        UUID newJobId = manager.addJob(this.etlPacket);
+        UUID newJobId = manager.addJob("", this.etlPacket);
         boolean newJobStarted = manager.startJob(newJobId);
         assertTrue(newJobStarted);
 
@@ -96,7 +96,7 @@ public class JobManagerTest {
     @Test
     public void removeJob() throws Exception {
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(this.etlPacket);
+        UUID jobId = manager.addJob("", this.etlPacket);
         boolean started = manager.startJob(jobId);
         assertTrue(started);
         manager.removeJob(jobId);
@@ -106,7 +106,7 @@ public class JobManagerTest {
     public void  getETLPacket() throws Exception {
         //TODO: we can do better
         JobManager manager = new JobManager();
-        UUID jobId = manager.addJob(this.etlPacket);
+        UUID jobId = manager.addJob("", this.etlPacket);
 
         JSONObject managerPacket = manager.getJobETLPacket(jobId);
         System.out.println(managerPacket);
