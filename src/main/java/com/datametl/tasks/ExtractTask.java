@@ -53,29 +53,35 @@ public class ExtractTask implements Task{
         this.bytePos = etlPacket.getLong("current_byte_position");
 
         if(this.fileType.equals("csv")){
+            System.out.println("PARSING AT CSV AT: "+this.bytePos);
             extractCSV();
+            System.out.println("Byte Location: "+this.lastBytePos);
         }else if(this.fileType.equals("json")){
             try {
+                System.out.println("PARSING AT CSV AT: "+this.bytePos);
                 extractJSON();
+                System.out.println("Byte Location: "+this.lastBytePos);
             }catch(JSONParsingException e){
-
+                e.printStackTrace();
             }
         }else if(this.fileType.equals("xml")){
+            System.out.println("PARSING AT CSV AT: "+this.bytePos);
             extractXML();
+            System.out.println("Byte Location: "+this.lastBytePos);
         }else{
             this.returnCode = JobState.FAILED;
         }
 
 
-        Task rules = new RulesEngineTask();
-        SubJob newRulesSubJob = new SubJob(rules);
+//        Task rules = new RulesEngineTask();
+//        SubJob newRulesSubJob = new SubJob(rules);
 
-//         INFO: Give RulesEngine a copy and reset the contents
-        newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
+//      INFO: Give RulesEngine a copy and reset the contents
+//        newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
         JSONArray empty = new JSONArray();
         etlPacket.getJSONObject("data").put("contents", empty);
 
-        boolean status = parent.getParent().addSubJob(newRulesSubJob);
+//        boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
         returnCode = JobState.SUCCESS;
 
@@ -115,7 +121,7 @@ public class ExtractTask implements Task{
             Object[] nextLine;
 
             //Each nextLine is a row in CSV
-            while((nextLine=reader.readNext())!=null&&count<this.docToRead){
+            while((nextLine=reader.readNext())!=null){
                 if(nextLine!=null) {
                     List<Object> listLine = Arrays.asList(nextLine);
                     if (this.fieldName.isEmpty()) {
@@ -127,7 +133,12 @@ public class ExtractTask implements Task{
                         //System.out.println(listLine);
                     }
                 }
+//                this.lastBytePos = raf.getFilePointer();
+//                System.out.println("Byte Location: "+this.lastBytePos + "-------------- Count: "+count);
                 count++;
+                if(count>=this.docToRead){
+                    break;
+                }
                 //System.out.println(count);
 
             }
@@ -217,6 +228,7 @@ public class ExtractTask implements Task{
 //                    }
 
                     if(convertSuccess){
+                        docsRead++;
                         stringBuffer.setLength(0);
                     }
 
@@ -239,6 +251,7 @@ public class ExtractTask implements Task{
 //                    }
 
                     if(convertSuccess){
+                        docsRead++;
                         stringBuffer.setLength(0);
                     }
 
@@ -252,13 +265,11 @@ public class ExtractTask implements Task{
                 breakCount++;
 
 
-                if(convertSuccess){
-                    docsRead++;
-                    if(docsRead>=this.docToRead){
-                        this.lastBytePos = randomAccessFile.getFilePointer();
-                        break;
-                    }
+                if(docsRead>=this.docToRead){
+                    this.lastBytePos = randomAccessFile.getFilePointer();
+                    break;
                 }
+
 
                 this.lastBytePos = randomAccessFile.getFilePointer();
             }
@@ -306,7 +317,6 @@ public class ExtractTask implements Task{
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace();
             //System.out.println("Failed to convert/insert");
             return false;
         }
