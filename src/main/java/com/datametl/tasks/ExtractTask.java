@@ -6,6 +6,7 @@ import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -105,19 +106,26 @@ public class ExtractTask implements Task{
     private void extractCSV() {
 
         int count=0;
+        int linesToSkip=0;
         BufferedReader buff;
         RandomAccessFile raf = null;
+
+        if(this.etlPacket.has("linesRead")){
+            linesToSkip = (Integer)this.etlPacket.get("linesRead");
+        }else{
+            this.etlPacket.put("linesRead",0);
+        }
 
         try{
 
             raf = new RandomAccessFile(new File(this.filePath),"r");
 
-            raf.seek(bytePos);
+           //raf.seek(bytePos);
 
             InputStream is = Channels.newInputStream(raf.getChannel());
             InputStreamReader isr = new InputStreamReader(is);
             buff = new BufferedReader(isr);
-            CSVReader reader = new CSVReader(buff);
+            CSVReader reader = new CSVReader(buff, CSVParser.DEFAULT_SEPARATOR,CSVParser.DEFAULT_QUOTE_CHARACTER,linesToSkip);
             Object[] nextLine;
 
             //Each nextLine is a row in CSV
@@ -149,6 +157,7 @@ public class ExtractTask implements Task{
             reader.close();
             inputETLPacket(); //Puts information to ETLPacket
             this.etlPacket.put("current_byte_position", (this.lastBytePos));
+            this.etlPacket.put("linesRead",linesToSkip+count);
 
             //readContent();
         }catch(IOException e){
@@ -471,7 +480,7 @@ public class ExtractTask implements Task{
                 raf.read(something);
             }catch(Exception ee){
             }
-            System.out.println("SHIT - "+ new String(something));
+            //System.out.println("Something - "+ new String(something));
             e.printStackTrace();
         }catch (IOException e){
             e.printStackTrace();
