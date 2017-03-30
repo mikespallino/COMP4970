@@ -26,26 +26,11 @@ public class WorkflowTest {
                 "\t\"source\": {\n" +
                 "\t\t\"host_ip\": \"\",\n" +
                 "\t\t\"host_port\": 1234,\n" +
-                "\t\t\"path\": \"MOCK_DATA.xml\",\n" +
-                "\t\t\"file_type\": \"xml\"\n" +
+                "\t\t\"path\": \"MOCK_DATA.csv\",\n" +
+                "\t\t\"file_type\": \"csv\"\n" +
                 "\t},\n" +
                 "\t\"rules\": {\n" +
                 "\t\t\"transformations\": {\n" +
-                "\t\t\t\"transform1\": {\n" +
-                "\t\t\t\t\"source_column\": \"id\",\n" +
-                "\t\t\t\t\"new_field\": \"tester3\",\n" +
-                "\t\t\t\t\"transform\": \"ADD 3\"\n" +
-                "\t\t\t},\n" +
-                "\t\t\t\"transform2\": {\n" +
-                "\t\t\t\t\"source_column\": \"id\",\n" +
-                "\t\t\t\t\"new_field\": null,\n" +
-                "\t\t\t\t\"transform\": \"MULT 2\"\n" +
-                "\t\t\t},\n" +
-                "\t\t\t\"transform3\": {\n" +
-                "\t\t\t\t\"source_column\": \"id\",\n" +
-                "\t\t\t\t\"new_field\": \"desty4\",\n" +
-                "\t\t\t\t\"transform\": \"MULT 4\"\n" +
-                "\t\t\t}\n" +
                 "\t\t},\n" +
                 "\t\t\"mappings\": {\n" +
                 "\t\t\t\"first_name\": \"tester1\",\n" +
@@ -53,23 +38,19 @@ public class WorkflowTest {
                 "\t\t\t\"email\": \"tester3\",\n" +
                 "\t\t},\n" +
                 "\t\t\"filters\": {\n" +
-                "\t\t\t\"filter1\": {\n" +
-                "\t\t\t\t\"source_column\": \"tester4\",\n" +
-                "\t\t\t\t\"filter_value\": \"tester\",\n" +
-                "\t\t\t\t\"equality_test\": \"eq\"\n" +
-                "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t},\n" +
                 "\t\"destination\": {\n" +
-                "\t\t\"host_ip\": \"\",\n" +
-                "\t\t\"host_port\": 1234,\n" +
-                "\t\t\"username\": \"\",\n" +
-                "\t\t\"password\": \"\",\n" +
-                "\t\t\"storage_type\": \"\"\n" +
+                "\t\t\"host_ip\": \"localhost\",\n" +
+                "\t\t\"host_port\": 3306,\n" +
+                "\t\t\"username\": \"root\",\n" +
+                "\t\t\"password\": \"test\",\n" +
+                "\t\t\"storage_type\": \"mysql\",\n" +
+                "\t\t\"destination_location\": \"test.test_table\"\n" +
                 "\t},\n" +
                 "\t\"data\": {\n" +
                 "\t\t\"source_header\": \"\",\n" +
-                "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\"],\n" +
+                "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\", \"new\", \"value\"],\n" +
                 "\t\t\"contents\": [],\n" +
                 "\t}\n" +
                 "}";

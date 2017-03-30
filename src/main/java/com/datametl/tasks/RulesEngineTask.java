@@ -55,6 +55,7 @@ public class RulesEngineTask implements Task {
         makeNewHeader(transforms, mappings);
 
         JSONArray headersToKeep = headerIndexesToKeep();
+        System.out.println(headersToKeep);
 
         //loop through each line
         for (int x =0; x<dataContents.length(); x++){
@@ -77,6 +78,15 @@ public class RulesEngineTask implements Task {
         pckt.getJSONObject("data").put("contents", dataContents);
         System.out.println(pckt);
         System.out.println("POST-Size of Data: " + dataContents.length());
+
+        Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"));
+        SubJob newExportSubJob = new SubJob(export);
+
+//         INFO: Give RulesEngine a copy and reset the contents
+        newExportSubJob.setETLPacket(new JSONObject(pckt.toString()));
+        JSONArray empty = new JSONArray();
+
+        boolean status = parent.getParent().addSubJob(newExportSubJob);
 
         current_state = JobState.SUCCESS;
     }
