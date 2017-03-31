@@ -59,11 +59,13 @@ public class RulesEngineTask implements Task {
         //loop through each line
         for (int x =0; x<dataContents.length(); x++){
             JSONArray line = getLine(dataContents, x);
-            //System.out.println("Pre Transform: " + line);
+            System.out.println("New Header: " + newHeader);
+            System.out.println("Pre Transform: " + line);
             if (!doFilters(line,filters)){
                 toDeleteList.add(toDeleteList.size(), x);
             }else {
                 line = doTransformations(transforms, line);
+                System.out.println("Pre Mapping: " + line);
                 line = doMappings(mappings, line, headersToKeep);
                 System.out.println("Current Line: " + line);
                 dataContents.put(x, line);
@@ -137,10 +139,14 @@ public class RulesEngineTask implements Task {
         for (int x=0; x<destinationHeader.length();x++){
             sendback.put(x,JSONObject.NULL);
         }
+        System.out.println("1 THIS IS SENDBACK: " + sendback);
         for (int x =0; x<toKeep.length();x++){
-            sendback.put(x, line.get(toKeep.getInt(x)));
+            String headerName = newHeader.getString(toKeep.getInt(x));
+            int headerIndex = getArrayIndex(destinationHeader, headerName);
+            sendback.put(headerIndex, line.get(toKeep.getInt(x)));
         }
 
+        System.out.println("2 THIS IS SENDBACK: " + sendback);
         Iterator<?> keys = mappings.keys();
         while (keys.hasNext()){
             String curMapping = (String)keys.next();
@@ -149,6 +155,7 @@ public class RulesEngineTask implements Task {
             int newFieldIndex = getArrayIndex(destinationHeader, newField);
             sendback.put(newFieldIndex, line.get(indexCurMapping));
         }
+        System.out.println("3 THIS IS SENDBACK: " + sendback);
 
         return sendback;
     }
