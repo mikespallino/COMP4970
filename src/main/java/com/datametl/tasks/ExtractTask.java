@@ -1,11 +1,8 @@
 package com.datametl.tasks;
 
-import com.ctc.wstx.exc.WstxUnexpectedCharException;
 import com.datametl.exception.JSONParsingException;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.json.JSONArray;
@@ -38,7 +35,6 @@ public class ExtractTask implements Task{
     private String filePath;
     private String fileType;
     private int docToRead;
-    private long linesRead;
     private long bytePos;
     private long lastBytePos;
 
@@ -59,14 +55,14 @@ public class ExtractTask implements Task{
             System.out.println("Byte Location: "+this.lastBytePos);
         }else if(this.fileType.equals("json")){
             try {
-                System.out.println("PARSING AT CSV AT: "+this.bytePos);
+                System.out.println("PARSING AT JSON AT: "+this.bytePos);
                 extractJSON();
                 System.out.println("Byte Location: "+this.lastBytePos);
             }catch(JSONParsingException e){
                 e.printStackTrace();
             }
         }else if(this.fileType.equals("xml")){
-            System.out.println("PARSING AT CSV AT: "+this.bytePos);
+            System.out.println("PARSING AT XML AT: "+this.bytePos);
             extractXML();
             System.out.println("Byte Location: "+this.lastBytePos);
         }else{
@@ -100,9 +96,6 @@ public class ExtractTask implements Task{
         return parent;
     }
 
-
-    //TODO: Parse with delimiters
-    //TODO: Get Bytes to be read
     private void extractCSV() {
 
         int count=0;
@@ -172,24 +165,11 @@ public class ExtractTask implements Task{
 
     private void extractJSON() throws JSONParsingException {
 
-        //TODO: Send to Matt
-
-
         int count = 0;
         int breakCount=0;
         int maxBreakCount=500;
-        int docsRead=0;
 
         try{
-
-//            JsonFactory factory = new JsonFactory();
-//            JsonParser parser = factory.createParser(new File(this.filePath));
-//
-//            ObjectMapper mapper = new ObjectMapper();
-//            List<Object[]> myObjects = mapper.readValue(parser, new TypeReference<List<Object>>(){});
-//            System.out.println(myObjects);
-//
-//            parser.close();
 
 
             RandomAccessFile randomAccessFile = new RandomAccessFile(this.filePath,"r");
@@ -209,10 +189,15 @@ public class ExtractTask implements Task{
                 boolean convertSuccess=false;
 
                 if(randomAccessFile.getFilePointer()>= randomAccessFile.length()){
+                    this.lastBytePos=randomAccessFile.getFilePointer();
+                    this.etlPacket.put("current_byte_position",this.lastBytePos);
                     System.out.println("END OF FILE - CLOSING");
                     randomAccessFile.close();
                     break;
                 }
+
+                this.lastBytePos = randomAccessFile.getFilePointer();
+//                System.out.println("Byte Location 1 : "+this.lastBytePos + "-------------- Count: "+count);
 
                 //If first line has '[', ignore and add to stringBuffer
                 if (line.charAt(0) == '[') {
@@ -237,7 +222,7 @@ public class ExtractTask implements Task{
 //                    }
 
                     if(convertSuccess){
-                        docsRead++;
+                        count++;
                         stringBuffer.setLength(0);
                     }
 
@@ -260,7 +245,7 @@ public class ExtractTask implements Task{
 //                    }
 
                     if(convertSuccess){
-                        docsRead++;
+                        count++;
                         stringBuffer.setLength(0);
                     }
 
@@ -270,17 +255,19 @@ public class ExtractTask implements Task{
 //                System.out.println("Byte location: " + randomAccessFile.getFilePointer());
 //                System.out.println("Count: "+count);
 
+                if(count>=this.docToRead){
+                    System.out.println("Byte Location SEIZE : "+this.lastBytePos + "-------------- Count: "+count);
+                    break;
+                }else{
+                    this.lastBytePos = randomAccessFile.getFilePointer();
+//                    System.out.println("Byte Location 2 : "+this.lastBytePos + "-------------- Count: "+count);
+                }
+
                 //Increment counter to determine if valid
                 breakCount++;
 
 
-                if(docsRead>=this.docToRead){
-                    this.lastBytePos = randomAccessFile.getFilePointer();
-                    break;
-                }
 
-
-                this.lastBytePos = randomAccessFile.getFilePointer();
             }
 
             if(breakCount>=maxBreakCount){
@@ -332,7 +319,6 @@ public class ExtractTask implements Task{
     }
 
     private void extractXML(){
-        //TODO: Parse, Export to ETLPacket, send to Matt
 
         int count=0;
         BufferedReader buff;
@@ -486,23 +472,6 @@ public class ExtractTask implements Task{
             e.printStackTrace();
         }
 
-
-
-
-
-
-//        try{
-//            File xmlFile = new File(this.filePath);
-//
-//            XmlMapper xmlMapper = new XmlMapper();
-//            List entries = xmlMapper.readValue(xmlFile,List.class);
-//
-//            ObjectMapper jsonMapper = new ObjectMapper();
-//            String json = jsonMapper.writeValueAsString(entries); //Converted entire file to JSON String
-//
-//        }catch(Exception e){
-//
-//        }
     }
 
     private void inputETLPacket(){
