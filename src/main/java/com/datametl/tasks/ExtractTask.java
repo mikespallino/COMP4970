@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class ExtractTask implements Task{
 
-    private JobState returnCode;
+    private JobState returnCode = JobState.NOT_STARTED;
     private SubJob parent = null;
     private JSONObject etlPacket;
 
@@ -44,7 +44,6 @@ public class ExtractTask implements Task{
      * Sets the returnCode to NOT_STARTED
      */
     public ExtractTask() {
-        returnCode = JobState.NOT_STARTED;
     }
 
 
