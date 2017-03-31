@@ -137,20 +137,18 @@ public class ExtractTask implements Task{
 //                this.lastBytePos = raf.getFilePointer();
 //                System.out.println("Byte Location: "+this.lastBytePos + "-------------- Count: "+count);
                 count++;
-                if(count>=this.docToRead){
+                if(count>this.docToRead){
                     break;
                 }
                 //System.out.println(count);
-
+                this.lastBytePos = raf.getFilePointer();
             }
 
-            //System.out.println("LINES READ: "+reader.getLinesRead());
-            this.lastBytePos = raf.getFilePointer();
 
             reader.close();
             inputETLPacket(); //Puts information to ETLPacket
             this.etlPacket.put("current_byte_position", (this.lastBytePos));
-            this.etlPacket.put("linesRead",linesToSkip+count);
+            this.etlPacket.put("linesRead",linesToSkip+count-1);
 
             //readContent();
         }catch(IOException e){
