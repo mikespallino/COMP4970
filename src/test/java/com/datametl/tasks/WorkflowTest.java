@@ -48,8 +48,9 @@ public class WorkflowTest {
                 "\t\t\t}\n" +
                 "\t\t},\n" +
                 "\t\t\"mappings\": {\n" +
-                "\t\t\t\"tester1\": \"desty2\",\n" +
-                "\t\t\t\"tester2\": \"desty1\"\n" +
+                "\t\t\t\"first_name\": \"tester1\",\n" +
+                "\t\t\t\"last_name\": \"tester2\",\n" +
+                "\t\t\t\"email\": \"tester3\",\n" +
                 "\t\t},\n" +
                 "\t\t\"filters\": {\n" +
                 "\t\t\t\"filter1\": {\n" +
