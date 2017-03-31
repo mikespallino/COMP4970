@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class ExtractTask implements Task{
 
-    private JobState returnCode = JobState.NOT_STARTED;
+    private JobState returnCode;
     private SubJob parent = null;
     private JSONObject etlPacket;
 
@@ -38,10 +38,27 @@ public class ExtractTask implements Task{
     private long bytePos;
     private long lastBytePos;
 
+    /**
+     * Constructor
+     * <p>
+     * Sets the returnCode to NOT_STARTED
+     */
     public ExtractTask() {
+        returnCode = JobState.NOT_STARTED;
     }
 
+
+    /**
+     * Parses through the file by the file type given in the ETLPacket.
+     * <p>
+     * Obtains the filePath,fileType,docsToRead, and bytePos and determines
+     * the necessary method for extraction of file. After succession,
+     * it will create a new RulesEngineTask and pass the ETLPacket.
+     * Then it empties the content array in the ETLPacket.
+     */
     public void apply() {
+
+//      Obtain necessary data from ETLPacket for extraction
         this.returnCode = JobState.RUNNING;
         this.etlPacket = parent.getETLPacket();
         this.filePath = etlPacket.getJSONObject("source").getString("path");
@@ -49,53 +66,72 @@ public class ExtractTask implements Task{
         this.docToRead = etlPacket.getInt("documents_to_read");
         this.bytePos = etlPacket.getLong("current_byte_position");
 
+//      Determines which extraction method based on file type
+//      Sets JobState to failed if fileType was not specified
         if(this.fileType.equals("csv")){
-            System.out.println("PARSING AT CSV AT: "+this.bytePos);
             extractCSV();
-            System.out.println("Byte Location: "+this.lastBytePos);
         }else if(this.fileType.equals("json")){
             try {
-                System.out.println("PARSING AT JSON AT: "+this.bytePos);
                 extractJSON();
-                System.out.println("Byte Location: "+this.lastBytePos);
             }catch(JSONParsingException e){
                 e.printStackTrace();
             }
         }else if(this.fileType.equals("xml")){
-            System.out.println("PARSING AT XML AT: "+this.bytePos);
             extractXML();
-            System.out.println("Byte Location: "+this.lastBytePos);
         }else{
             this.returnCode = JobState.FAILED;
         }
 
-
-//        Task rules = new RulesEngineTask();
-//        SubJob newRulesSubJob = new SubJob(rules);
+//      Creates a new RulesEngineTask if extraction was successful
+        Task rules = new RulesEngineTask();
+        SubJob newRulesSubJob = new SubJob(rules);
 
 //      INFO: Give RulesEngine a copy and reset the contents
-//        newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
+        newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
         JSONArray empty = new JSONArray();
         etlPacket.getJSONObject("data").put("contents", empty);
 
-//        boolean status = parent.getParent().addSubJob(newRulesSubJob);
+        boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
         returnCode = JobState.SUCCESS;
 
     }
 
+    /**
+     * Returns the returnCode of the JobState
+     *
+     * @return returnCode of ExtractTask
+     */
     public JobState getResult() {
         return this.returnCode;
     }
 
+    /**
+     * Sets the parent of ExtractTask
+     *
+     * @param parent PLACEHOLDER
+     */
     public void setParent(SubJob parent) {
         this.parent = parent;
     }
 
+    /**
+     * Returns the parent of ExtractTask
+     *
+     * @return parent of ExtractTask
+     */
     public SubJob getParent() {
         return parent;
     }
 
+    /**
+     * Parses through the CSV file by chunks and stores the data into arrays.
+     * <p>
+     * The method uses a CSVReader and will separate the values with its default delimiters.
+     * It will skip the necessary lines when parsing a new chunk and stores each line into an array.
+     * Once the file parses the chunk specified, it will call inputETLPacket to put the content into it.
+     * Should the parsing fail, the jobState is set for failed.
+     */
     private void extractCSV() {
 
         int count=0;
@@ -103,6 +139,9 @@ public class ExtractTask implements Task{
         BufferedReader buff;
         RandomAccessFile raf = null;
 
+//      Determines whether or not if there is linesRead in the ETLPacket
+//      If so, then it will skip lines in the CSV based on the value.
+//      Else, it will put linesRead into the ETLPacket.
         if(this.etlPacket.has("linesRead")){
             linesToSkip = (Integer)this.etlPacket.get("linesRead");
         }else{
@@ -111,17 +150,17 @@ public class ExtractTask implements Task{
 
         try{
 
+//          A method to allow CSVParser to take in RandomAccessFile.
             raf = new RandomAccessFile(new File(this.filePath),"r");
-
-           //raf.seek(bytePos);
-
             InputStream is = Channels.newInputStream(raf.getChannel());
             InputStreamReader isr = new InputStreamReader(is);
             buff = new BufferedReader(isr);
+
+//          CSVReader will skip lines of the file and will use the default delimiters.
             CSVReader reader = new CSVReader(buff, CSVParser.DEFAULT_SEPARATOR,CSVParser.DEFAULT_QUOTE_CHARACTER,linesToSkip);
             Object[] nextLine;
 
-            //Each nextLine is a row in CSV
+//          Each nextLine is a row in CSV
             while((nextLine=reader.readNext())!=null){
                 if(nextLine!=null) {
                     List<Object> listLine = Arrays.asList(nextLine);
@@ -131,36 +170,38 @@ public class ExtractTask implements Task{
                     } else {
 
                         this.rows.add(listLine);
-                        //System.out.println(listLine);
                     }
                 }
-//                this.lastBytePos = raf.getFilePointer();
-//                System.out.println("Byte Location: "+this.lastBytePos + "-------------- Count: "+count);
+
                 count++;
-                if(count>this.docToRead){
+                if(count>this.docToRead){ // LinesToSkip is based on index 1
                     break;
                 }
-                //System.out.println(count);
+
                 this.lastBytePos = raf.getFilePointer();
             }
 
 
             reader.close();
-            inputETLPacket(); //Puts information to ETLPacket
+            inputETLPacket();
             this.etlPacket.put("current_byte_position", (this.lastBytePos));
-            this.etlPacket.put("linesRead",linesToSkip+count-1);
-
-            //readContent();
+            this.etlPacket.put("linesRead",linesToSkip+count-1); //LinesToSkip is based on index 1
         }catch(IOException e){
             e.printStackTrace();
             this.returnCode = JobState.FAILED;
         }
-
-        //this.etlPacket.put("current_byte_position", (lastBytePos-bytePos)+bytePos);
-
-
     }
 
+    /**
+     * Parses through the JSON file by chunks and stores the data into arrays.
+     * <p>
+     * The method will append lines into StringBuffer and call convertToJSONObject.
+     * It will continue to append until the string can be converted to JSONObject
+     * or the loop increments to the designated breakpoint. Each succession will
+     * increment a counter and stop the loop when the entire chunk defined is read.
+     *
+     * @throws JSONParsingException
+     */
     private void extractJSON() throws JSONParsingException {
 
         int count = 0;
@@ -169,23 +210,25 @@ public class ExtractTask implements Task{
 
         try{
 
-
             RandomAccessFile randomAccessFile = new RandomAccessFile(this.filePath,"r");
 
             StringBuffer stringBuffer = new StringBuffer();
             String line;
 
+//          Define line based on whether if the pointer is at the beginning of the file or not.
             if(this.bytePos==0){
                 line = randomAccessFile.readLine();
             }else{
                 randomAccessFile.seek(bytePos);
                 line = randomAccessFile.readLine();
             }
-            //String line = randomAccessFile.readLine();
 
+//          Will attempt to append lines into StringBuffer and form a JSONObject
+//          It is unknown whether the JSONObject is too long or valid so a breakpoint is set in place.
             while(breakCount<maxBreakCount) {
                 boolean convertSuccess=false;
 
+//              Will close and exit the file if it has reached the end.
                 if(randomAccessFile.getFilePointer()>= randomAccessFile.length()){
                     this.lastBytePos=randomAccessFile.getFilePointer();
                     this.etlPacket.put("current_byte_position",this.lastBytePos);
@@ -194,8 +237,6 @@ public class ExtractTask implements Task{
                     break;
                 }
 
-                this.lastBytePos = randomAccessFile.getFilePointer();
-//                System.out.println("Byte Location 1 : "+this.lastBytePos + "-------------- Count: "+count);
 
                 //If first line has '[', ignore and add to stringBuffer
                 if (line.charAt(0) == '[') {
@@ -203,7 +244,7 @@ public class ExtractTask implements Task{
                     //Appends line without [
                     stringBuffer.append(line.substring(1));
                     line = line.substring(1);
-                    String tempLine="";
+                    String tempLine;
 
                     if (stringBuffer.charAt(stringBuffer.length() - 1) == ',') {
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
@@ -214,20 +255,16 @@ public class ExtractTask implements Task{
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
                         convertSuccess=convertToJSONObject(tempLine);
                     }
-//                    else if(stringBuffer.charAt(stringBuffer.length() - 1) == '}'){
-//                        tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
-//                        convertSuccess=convertToJSONObject(tempLine);
-//                    }
-
                     if(convertSuccess){
                         count++;
+                        breakCount=0;
                         stringBuffer.setLength(0);
                     }
 
                 } else {
                     //If not the first line, append
                     stringBuffer.append(randomAccessFile.readLine());
-                    String tempLine="";
+                    String tempLine;
 
                     if (stringBuffer.charAt(stringBuffer.length() - 1) == ',') {
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
@@ -237,37 +274,27 @@ public class ExtractTask implements Task{
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
                         convertSuccess=convertToJSONObject(tempLine);
                     }
-//                    else if(stringBuffer.charAt(stringBuffer.length() - 1) == '}'){
-//                        tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
-//                        convertSuccess=convertToJSONObject(tempLine);
-//                    }
 
                     if(convertSuccess){
                         count++;
+                        breakCount=0;
                         stringBuffer.setLength(0);
                     }
 
                 }
-//                System.out.println("\n-------------------A Line---------------------");
-//                System.out.println("Line: " + stringBuffer);
-//                System.out.println("Byte location: " + randomAccessFile.getFilePointer());
-//                System.out.println("Count: "+count);
 
                 if(count>=this.docToRead){
-                    System.out.println("Byte Location SEIZE : "+this.lastBytePos + "-------------- Count: "+count);
                     break;
                 }else{
                     this.lastBytePos = randomAccessFile.getFilePointer();
-//                    System.out.println("Byte Location 2 : "+this.lastBytePos + "-------------- Count: "+count);
                 }
 
                 //Increment counter to determine if valid
                 breakCount++;
 
-
-
             }
 
+//          If the JSON is too long or invalid, it will close the file and set returnCode to fail.
             if(breakCount>=maxBreakCount){
                 randomAccessFile.close();
                 this.returnCode = JobState.FAILED;
@@ -278,7 +305,6 @@ public class ExtractTask implements Task{
             }
 
             this.etlPacket.put("current_byte_position", (this.lastBytePos));
-            //readContent();
 
         }catch(IOException e){
             e.printStackTrace();
@@ -286,36 +312,48 @@ public class ExtractTask implements Task{
         }
     }
 
+    /**
+     * A method to convert a String into a JSONObject
+     * <p>
+     * The method creates JSONObject based on StringBuffer. It will append lines from
+     * the JSON file into StringBuffer and attempt to form a JSONObject every append.
+     * Once successful, it will obtain the data from the JSONObject and put it into arrays.
+     *
+     * @param tempLine a string containing parts or a whole json object
+     * @return true or false depending on the success of conversion.
+     */
     private boolean convertToJSONObject(String tempLine){
         try {
-            //System.out.println("\n-----------------------Convert JSON with Bracket--------------------");
-            //System.out.println(tempLine);
             JSONObject convertedObject = new JSONObject(tempLine);
-            //System.out.println("Successful in converting");
 
-            //Insert into fieldNames
+//          Insert into fieldNames
             if(this.fieldName.isEmpty()){
                 this.fieldName = new ArrayList<Object>(convertedObject.keySet());
             }
 
-            //Mapping values to keys
+//          Mapping values to keys
             ArrayList<Object> content = new ArrayList<Object>();
             for(Object element : this.fieldName){
-                //System.out.println("VALUE: "+convertedObject.get((String)element));
                 content.add(convertedObject.get((String)element));
             }
             this.rows.add(content);
 
-
-            //System.out.println("Successful in insertion");
             return true;
 
         } catch (Exception e) {
-            //System.out.println("Failed to convert/insert");
             return false;
         }
     }
 
+    /**
+     * Parses through the XML file by chunks and stores the data in arrays.
+     * <p>
+     * The method uses XMLStreamReader to parse through the XML file.
+     * It will go though a while loop until it reaches the end of the file
+     * or the loop increments to the designated breakpoint. It goes through
+     * a switch case to determine whether the tag is a closing or opening tag.
+     * It will input the data from the tags into an array then call inputETLPacket.
+     */
     private void extractXML(){
 
         int count=0;
@@ -334,18 +372,6 @@ public class ExtractTask implements Task{
             buff = new BufferedReader(isr);
             XMLEventReader eventReader = factory.createXMLEventReader(buff);
 
-//            byte[] something =new byte[(int) 150];
-//            try {
-//                raf.read(something);
-//            }catch(Exception ee){
-//            }
-//            System.out.println("SHIT - "+ new String(something));
-//            raf.seek(this.lastBytePos);
-//
-//            if(this.bytePos!=0){
-//                raf.seek(this.bytePos);
-//            }
-
             ArrayList<Object> tempField = new ArrayList<Object>();
             ArrayList<Object> tempRow = new ArrayList<Object>();
 
@@ -354,7 +380,6 @@ public class ExtractTask implements Task{
 
                 XMLEvent event = eventReader.nextEvent();
 
-                //System.out.println("KEEP PRINTING: "+raf.getFilePointer());
                 switch(event.getEventType()){
 
                     //Since we cannot seek to position, we will loop through the document until it reaches to the bytePos
@@ -391,20 +416,15 @@ public class ExtractTask implements Task{
 
                         break;
                     case XMLStreamConstants.CHARACTERS:
-                        //System.out.println("XML Character");
                         Characters characters = event.asCharacters();
-                        //System.out.println("Characters Data: "+characters.getData());
                         if(characters.getData().contains("\n")){
                             break;
                         }
                         tempRow.add(characters.getData());
                         break;
                     case XMLStreamConstants.END_ELEMENT:
-                        //System.out.println("XML End Element");
                         EndElement endElement = event.asEndElement();
                         String eName = endElement.getName().getLocalPart();
-                        //System.out.println("End Element: "+eName);
-                        //System.out.println("Root End: "+this.etlPacket.get("rootTag"));
                         if(eName.equals(startString)) {
                             count++;
 
@@ -416,8 +436,6 @@ public class ExtractTask implements Task{
                             tempField = new ArrayList<Object>();
                             tempRow = new ArrayList<Object>();
 
-                            //System.out.println("Field Name: " + this.fieldName);
-                            //System.out.println("Rows: " + this.rows);
                         }else if(eName.equals(this.etlPacket.get("rootTag"))){
                             endReach = true;
 
@@ -425,32 +443,18 @@ public class ExtractTask implements Task{
 
                         break;
                     default:
-                        //System.out.println(event.getEventType());
                         break;
                 }
-                //System.out.println("Start String: "+startString);
-                //System.out.println("Temp Field Name: " + tempField);
-                //System.out.println("Temp Rows: " + tempRow);
                 this.lastBytePos = event.getLocation().getCharacterOffset();
 
                 //getCharacterOffset sets to next element
                 //Adding offset of known element to lastBytePos
                 if(endReach||count>=docToRead){
-                    //System.out.println("\n\n\n\n--------------------------I REACHED HERE--------------------------\n\n\n\n");
                     startString+="<>/";
                     this.lastBytePos = event.getLocation().getCharacterOffset()+startString.getBytes().length;
                     break;
                 }
             }
-
-//            System.out.println(this.lastBytePos);
-//            byte[] something =new byte[(int) 150];
-//            try {
-//                raf.read(something);
-//            }catch(Exception ee){
-//            }
-//            System.out.println("SHIT - "+ new String(something));
-//            raf.seek(this.lastBytePos);
 
             eventReader.close();
             inputETLPacket(); //Puts information to ETLPacket
@@ -458,20 +462,23 @@ public class ExtractTask implements Task{
 
         }catch(FileNotFoundException e){
             e.printStackTrace();
+            this.returnCode=JobState.FAILED;
         }catch (XMLStreamException e){
-            byte[] something =new byte[(int) 150];
-            try {
-                raf.read(something);
-            }catch(Exception ee){
-            }
-            //System.out.println("Something - "+ new String(something));
             e.printStackTrace();
+            this.returnCode=JobState.FAILED;
         }catch (IOException e){
             e.printStackTrace();
+            this.returnCode=JobState.FAILED;
         }
 
     }
 
+    /**
+     * Inputs the data stored into the arrays into ETLPacket
+     * <p>
+     * Creates a JSONObject and puts in the source header and JSONArray contents into it.
+     * It will only put the source header once after it has been filled.
+     */
     private void inputETLPacket(){
 
         JSONObject data = this.etlPacket.getJSONObject("data");
@@ -486,15 +493,10 @@ public class ExtractTask implements Task{
         }
 
         data.put("contents",contents);
-//        this.etlPacket.put("data",data);
-
-        //System.out.println("INPUT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
-        readContent();
     }
 
+//  Debugging purposes
     private void readContent(){
-        //System.out.println("READCONTENT - fieldName: "+this.fieldName);
-
         System.out.println("READCONTENT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
     }
 }
