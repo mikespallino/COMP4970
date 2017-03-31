@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 
 public class ExportMYSQLTask implements ExportInterface, Task {
@@ -18,7 +17,6 @@ public class ExportMYSQLTask implements ExportInterface, Task {
     private String password;
     private String table;
     private StringBuilder columns;
-    private StringBuilder values;
     private StringBuilder statement;
     private JobState state;
     private SubJob parent;
@@ -27,7 +25,6 @@ public class ExportMYSQLTask implements ExportInterface, Task {
 
     public ExportMYSQLTask() {
         columns = new StringBuilder();
-        values = new StringBuilder();
         statement = new StringBuilder();
         state = JobState.NOT_STARTED;
     }
@@ -119,9 +116,13 @@ public class ExportMYSQLTask implements ExportInterface, Task {
         state = JobState.RUNNING;
 
         etlPacket = parent.getETLPacket();
+        System.out.println("Connecting...");
         initiateConnection();
+        System.out.println("Parsing contents...");
         retrieveContents(etlPacket);
+        System.out.println("Exporting...");
         exportToDSS();
+        System.out.println("Closing");
         terminateConnection();
 
         state = JobState.SUCCESS;

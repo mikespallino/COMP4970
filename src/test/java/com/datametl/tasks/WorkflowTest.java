@@ -41,12 +41,12 @@ public class WorkflowTest {
                 "\t\t}\n" +
                 "\t},\n" +
                 "\t\"destination\": {\n" +
-                "\t\t\"host_ip\": \"localhost\",\n" +
-                "\t\t\"host_port\": 3306,\n" +
-                "\t\t\"username\": \"root\",\n" +
-                "\t\t\"password\": \"test\",\n" +
-                "\t\t\"storage_type\": \"mysql\",\n" +
-                "\t\t\"destination_location\": \"test.test_table\"\n" +
+                "\t\t\"host_ip\": \"127.0.0.1\",\n" +
+                "\t\t\"host_port\": 5432,\n" +
+                "\t\t\"username\": \"mspallino\",\n" +
+                "\t\t\"password\": \"\",\n" +
+                "\t\t\"storage_type\": \"postgresql\",\n" +
+                "\t\t\"destination_location\": \"mspallino.testtable\"\n" +
                 "\t},\n" +
                 "\t\"data\": {\n" +
                 "\t\t\"source_header\": \"\",\n" +
