@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Servlet implementation class FileCounter
+ * Servlet implementation class getworkflows
  */
 @WebServlet("/getworkflows")
 public class GetWorkflows extends HttpServlet {

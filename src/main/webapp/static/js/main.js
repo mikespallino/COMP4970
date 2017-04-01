@@ -96,7 +96,7 @@ $(document).ready(function() {
             $.ajax({
                         url: "/DataMETL/getworkflows",
                         success: function(result){
-                                    parseWorkflowResponse(result, '#inProgressLocation');
+                                    parseWorkflowResponse(result, '#inProgressLocation', 'In Progress Workflow', true);
                                  },
                         data: {'status': 'RUNNING'},
                         type: "GET"
@@ -110,7 +110,7 @@ $(document).ready(function() {
             $.ajax({
                         url: "/DataMETL/getworkflows",
                         success: function(result){
-                                    parseWorkflowResponse(result, '#completeLocation');
+                                    parseWorkflowResponse(result, '#completeLocation', 'Completed Workflow', false);
                                  },
                         data: {'status': 'SUCCESS'},
                         type: "GET"
@@ -124,7 +124,7 @@ $(document).ready(function() {
             $.ajax({
                         url: "/DataMETL/getworkflows",
                         success: function(result){
-                                    parseWorkflowResponse(result, '#failedLocation');
+                                    parseWorkflowResponse(result, '#failedLocation', 'Failed Workflow', false);
                                  },
                         data: {'status': 'FAILED'},
                         type: "GET"
@@ -150,21 +150,20 @@ $(document).ready(function() {
             });
     }
 
-    function parseWorkflowResponse(result, divid) {
+    function parseWorkflowResponse(result, divid, title, shouldMakeCancelButton) {
         var response = JSON.parse(result);
         var key;
+        // Empty out the buttons every time
+        $(divid).html('');
         for(key in response){
             if(document.getElementById(key) == null) {
                 $(workflowHtml.format(key)).appendTo(divid);
-                makeWorkflowInfoButton(key);
+                makeWorkflowInfoButton(key, title, shouldMakeCancelButton);
             }
-        }
-        if (key == null) {
-            $(divid).html('');
         }
     }
 
-    function makeWorkflowInfoButton(jobid) {
+    function makeWorkflowInfoButton(jobid, title, shouldMakeCancelButton) {
         var transformPacketCount = 0;
         var mappingPacketCount = 0;
         var filterPacketCount = 0;
@@ -175,7 +174,24 @@ $(document).ready(function() {
                 success: function(result){
                             $('#datametl-page').html("");
                             $('#datametl-page').load('workflow_template.html', function() {
+                                if(shouldMakeCancelButton == true) {
+                                    $('<div style="margin: auto;width: 50%;"><h3>{0}</h3></div><button type="button" class="btn btn-danger" id="cancelButton" style="float:right;">Cancel</button><br/><br/><br/>'.format(title, jobid)).insertBefore('#createWorkflowForm');
+                                    $('#cancelButton').click(function() {
+                                        $.ajax({
+                                                    url: "cancelworkflow?jobid={0}".format(jobid),
+                                                    success: function(result){
+                                                                $('#datametl-page').html("");
+                                                             },
+                                                    type: 'GET'
+                                                });
+                                    });
+                                } else {
+                                    $('<div style="margin: auto;width: 50%;"><h3>{0}</h3></div><br/><br/><br/>'.format(title)).insertBefore('#createWorkflowForm');
+                                }
                                 $('#executeButton').prop('disabled', true);
+                                $('#transform-new').prop('disabled', true);
+                                $('#mapping-new').prop('disabled', true);
+                                $('#filter-new').prop('disabled', true);
 
                                 var response = JSON.parse(result);
                                 var source = response['source'];
@@ -225,12 +241,14 @@ $(document).ready(function() {
                                 $('#destination_type').val(destination['storage_type']);
                                 $('#destination_port').val(destination['host_port']);
                                 $('#destination_ip').val(destination['host_port']);
+                                //TODO: Once Zach is done.
                                 $('#destination_location').val("NONE");
                                 $('#destination_schema').val(data['destination_header']);
                                 $('#username').val(destination['username']);
                                 $('#password').val(destination['password']);
-                                $('#time').val("NEVER");
-                                $('#schedule').val("NEVER");
+                                $('#time').val(response['time']);
+                                $('#schedule').val(response['schedule']);
+                                $('#name').val(response['name']);
                             });
                          },
                 type: "GET"

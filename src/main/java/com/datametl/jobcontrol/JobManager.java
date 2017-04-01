@@ -21,7 +21,7 @@ public class JobManager implements Runnable {
         jobs = new HashMap<UUID, Job>();
         namedJobs = new HashMap<String, UUID>();
         scheduler = new Scheduler();
-        curThread = new Thread(this);
+        curThread = new Thread(this, "JobManager");
         curThread.start();
     }
 
@@ -130,6 +130,7 @@ public class JobManager implements Runnable {
         for(UUID id: jobs.keySet()) {
             jobs.get(id).kill();
         }
+        killScheduler();
         curThread.interrupt();
         return true;
     }
@@ -161,5 +162,9 @@ public class JobManager implements Runnable {
         job.setETLPacket(packet);
 
         jobs.put(jobid, job);
+    }
+
+    public void killScheduler() {
+        scheduler.kill();
     }
 }

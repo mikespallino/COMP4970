@@ -25,4 +25,9 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>CancelWorkflow</servlet-name>
+        <servlet-class>com.datametl.webapp.CancelWorkflow</servlet-class>
+    </servlet>
+
 </web-app>
