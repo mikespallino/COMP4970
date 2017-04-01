@@ -15,7 +15,7 @@ public class Scheduler implements Runnable {
     private Thread curThread;
 
     public Scheduler() {
-        curThread = new Thread(this);
+        curThread = new Thread(this, "Scheduler");
         curThread.start();
     }
 
@@ -79,6 +79,7 @@ public class Scheduler implements Runnable {
                                 String dow = new SimpleDateFormat("EE").format(date);
                                 String time = new SimpleDateFormat("HH:mm").format(date);
 
+                                //TODO: Implement some sort of black-list so that we don't re run a job if it finishes in under a minute
                                 for (String dayToRun : s.split(",")) {
                                     if (dayToRun.equals(dow)) {
                                         if (time.equals(t)) {
@@ -93,7 +94,22 @@ public class Scheduler implements Runnable {
                             }
                         }
                     } else {
-                        break;
+                        //INFO: There are no workflows saved so we should wait a bit until we check again
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                            return;
+                        }
+                    }
+                } else {
+                    //INFO: Make the directory if it isn't there yet, then sleep
+                    dir.mkdir();
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        return;
                     }
                 }
                 try {
@@ -110,6 +126,10 @@ public class Scheduler implements Runnable {
 
     public void run() {
         poll();
+    }
+
+    public void kill() {
+        curThread.interrupt();
     }
 
 }
