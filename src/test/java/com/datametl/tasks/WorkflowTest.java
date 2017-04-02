@@ -33,7 +33,8 @@ public class WorkflowTest {
                 "\t\t\"transformations\": {\n" +
                 "\t\t},\n" +
                 "\t\t\"mappings\": {\n" +
-                "\t\t\t\"first_name\": \"tester1\",\n" +
+                "\t\t\t\"id\": \"tester1\",\n" +
+                "\t\t\t\"first_name\": \"value\",\n" +
                 "\t\t\t\"last_name\": \"tester2\",\n" +
                 "\t\t\t\"email\": \"tester3\",\n" +
                 "\t\t},\n" +

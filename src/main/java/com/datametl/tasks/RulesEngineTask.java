@@ -275,24 +275,12 @@ public class RulesEngineTask implements Task {
                     value = line.get(indexToGet).toString();
 
                     if (transformValue.equals("MD5")){
-<<<<<<< d0ce1a34bf474579dd39f780ba9a1ab67e297ce4
                         line.put(indexToGet,hashString(value, "MD5"));
                     }
                     else if (transformValue.equals("SHA1")){
                         line.put(indexToGet,hashString(value, "SHA-1"));
                     }
                     else if (transformValue.equals("SHA256")){
-=======
-                        //System.out.println(hashString(value, "MD5"));
-                        line.put(indexToGet,hashString(value, "MD5"));
-                    }
-                    else if (transformValue.equals("SHA1")){
-                        //System.out.println(hashString(value, "SHA-1"));
-                        line.put(indexToGet,hashString(value, "SHA-1"));
-                    }
-                    else if (transformValue.equals("SHA256")){
-                        //System.out.println(hashString(value, "SHA-256"));
->>>>>>> [PostgreSQL]
                         line.put(indexToGet,hashString(value, "SHA-256"));
                     }
 
