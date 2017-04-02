@@ -42,11 +42,11 @@ public class WorkflowTest {
                 "\t},\n" +
                 "\t\"destination\": {\n" +
                 "\t\t\"host_ip\": \"127.0.0.1\",\n" +
-                "\t\t\"host_port\": 5432,\n" +
+                "\t\t\"host_port\": 8983,\n" +
                 "\t\t\"username\": \"mspallino\",\n" +
                 "\t\t\"password\": \"\",\n" +
-                "\t\t\"storage_type\": \"postgresql\",\n" +
-                "\t\t\"destination_location\": \"mspallino.testtable\"\n" +
+                "\t\t\"storage_type\": \"solr\",\n" +
+                "\t\t\"destination_location\": \"testcore\"\n" +
                 "\t},\n" +
                 "\t\"data\": {\n" +
                 "\t\t\"source_header\": \"\",\n" +

@@ -2,10 +2,8 @@
 import java.lang.Object;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrClient;
-//import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.json.JSONArray;
@@ -19,14 +17,26 @@ import java.util.ArrayList;
 
 public class ExportSolrTask implements ExportInterface, Task {
     private SolrClient conn;
-    private String host_address;
+    private String host_address = "http://";
     private SolrInputDocument doc = new SolrInputDocument();
-    private ArrayList<String> columns = new ArrayList<String>();
-    private StringBuilder statement;
     private JobState state;
     private SubJob parent;
+    private JSONObject etlPacket;
 
-    public void initiateConnection() {SolrClient conn = new HttpSolrClient(host_address); }
+
+    public ExportSolrTask(){
+        state = JobState.NOT_STARTED;
+    }
+
+    public void initiateConnection() {
+        JSONObject connInfo = etlPacket.getJSONObject("destination");
+        host_address += connInfo.getString("host_ip");
+        host_address += ":" + String.valueOf(connInfo.getInt("host_port"));
+        host_address += "/solr";
+        host_address += "/" + connInfo.getString("destination_location");
+
+        conn = new HttpSolrClient(host_address);
+    }
 
     public void terminateConnection() {
         try {
@@ -37,35 +47,32 @@ public class ExportSolrTask implements ExportInterface, Task {
         }
     }
     public void retrieveContents(JSONObject packet) {
-        JSONObject connInfo = packet.getJSONObject("destination");
-        JSONArray content = packet.getJSONArray("contents");
-        JSONArray headers = packet.getJSONArray("destination_header");
+        JSONArray content = packet.getJSONObject("data").getJSONArray("contents");
+        JSONArray headers = packet.getJSONObject("data").getJSONArray("destination_header");
 
-        host_address = connInfo.getString("host_ip");
-        host_address.concat(":");
-        host_address.concat(connInfo.getString("host_port"));
-
-
-        for (Object j: headers){
-            if(j instanceof String){
-                columns.add("\"" + (j.toString() + "\""));
+        for(int i = 0; i < content.length(); i++) {
+            JSONArray data = content.getJSONArray(i);
+            for(int j = 0; j < data.length(); j++){
+                doc.addField(headers.getString(j), data.get(j));
             }
-        }
-        int x = 0;
-        for (Object i : content) {
-            doc.addField(columns.get(x), ("\"" + (i.toString()) + "\""));
-            if(x == columns.size()){
-                x = 0;
+            try {
+                conn.add(doc);
+                doc = new SolrInputDocument();
             }
-            else{
-                x++;
+            catch(MalformedURLException e){
+                e.printStackTrace();
+            }
+            catch(java.io.IOException e){
+                e.printStackTrace();
+            }
+            catch(SolrServerException e){
+                e.printStackTrace();
             }
         }
     }
 
     public void exportToDSS() {
         try {
-            conn.add(doc);
             conn.commit();
         }
         catch(MalformedURLException e){
@@ -81,9 +88,17 @@ public class ExportSolrTask implements ExportInterface, Task {
     }
 
       public void apply() {
-          JSONObject ETLPacket = parent.getETLPacket();
+          state = JobState.RUNNING;
+
+          etlPacket = parent.getETLPacket();
+          System.out.println("Connecting...");
           initiateConnection();
-          retrieveContents(ETLPacket);
+          System.out.println("Parsing...");
+          retrieveContents(etlPacket);
+          System.out.println("Exporting...");
+          exportToDSS();
+          System.out.println("Closing");
+          terminateConnection();
 
           state = JobState.SUCCESS;
       }
