@@ -79,10 +79,10 @@ public class RulesEngineTask implements Task {
         //System.out.println(pckt);
         //System.out.println("POST-Size of Data: " + dataContents.length());
 
-        Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"));
-        SubJob newExportSubJob = new SubJob(export);
-        newExportSubJob.setETLPacket(new JSONObject(pckt.toString()));
-        boolean status = parent.getParent().addSubJob(newExportSubJob);
+//        Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"));
+//        SubJob newExportSubJob = new SubJob(export);
+//        newExportSubJob.setETLPacket(new JSONObject(pckt.toString()));
+//        boolean status = parent.getParent().addSubJob(newExportSubJob);
 
         current_state = JobState.SUCCESS;
     }
