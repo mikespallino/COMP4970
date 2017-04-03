@@ -50,6 +50,13 @@ $(document).ready(function() {
                         <br> \
                       </div>';
 
+    var logHtml = '<div class="datametlinputbox"> \
+                       <div class="form-group"> \
+                           <h3>Logs</h3> \
+                       </div> \
+                       <textarea id="logs" rows=10 class="form-control" style="width:100%;" disabled></textarea> \
+                   </div>';
+
     var workflowHtml = '<div id="{0}"><button id="button-{0}"><h5>{0}</h5></button></div>';
 
 
@@ -158,7 +165,7 @@ $(document).ready(function() {
         for(key in response){
             if(document.getElementById(key) == null) {
                 $(workflowHtml.format(key)).appendTo(divid);
-                makeWorkflowInfoButton(key, title, shouldMakeCancelButton);
+                makeWorkflowInfoButton(key, title + " - [" + key + "]", shouldMakeCancelButton);
             }
         }
     }
@@ -175,7 +182,7 @@ $(document).ready(function() {
                             $('#datametl-page').html("");
                             $('#datametl-page').load('workflow_template.html', function() {
                                 if(shouldMakeCancelButton == true) {
-                                    $('<div style="margin: auto;width: 50%;"><h3>{0}</h3></div><button type="button" class="btn btn-danger" id="cancelButton" style="float:right;">Cancel</button><br/><br/><br/>'.format(title, jobid)).insertBefore('#createWorkflowForm');
+                                    $('<div style="width: 100%;"><h3>{0}</h3></div><button type="button" class="btn btn-danger" id="cancelButton" style="float:right;">Cancel</button><br/><br/><br/>'.format(title, jobid)).insertBefore('#createWorkflowForm');
                                     $('#cancelButton').click(function() {
                                         $.ajax({
                                                     url: "cancelworkflow?jobid={0}".format(jobid),
@@ -186,7 +193,7 @@ $(document).ready(function() {
                                                 });
                                     });
                                 } else {
-                                    $('<div style="margin: auto;width: 50%;"><h3>{0}</h3></div><br/><br/><br/>'.format(title)).insertBefore('#createWorkflowForm');
+                                    $('<div style="width: 100%;"><h3>{0}</h3></div><br/><br/><br/>'.format(title)).insertBefore('#createWorkflowForm');
                                 }
                                 $('#executeButton').prop('disabled', true);
                                 $('#transform-new').prop('disabled', true);
@@ -241,14 +248,25 @@ $(document).ready(function() {
                                 $('#destination_type').val(destination['storage_type']);
                                 $('#destination_port').val(destination['host_port']);
                                 $('#destination_ip').val(destination['host_port']);
-                                //TODO: Once Zach is done.
-                                $('#destination_location').val("NONE");
+                                $('#destination_location').val(destination['destination_location']);
                                 $('#destination_schema').val(data['destination_header']);
                                 $('#username').val(destination['username']);
                                 $('#password').val(destination['password']);
                                 $('#time').val(response['time']);
                                 $('#schedule').val(response['schedule']);
                                 $('#name').val(response['name']);
+
+                                $.ajax({
+                                    url: "/DataMETL/getlogs?jobid={0}".format(jobid),
+                                    success: function(result) {
+                                        $(logHtml).appendTo('#rightcolumnpage')
+                                        $('#logs').text(result);
+                                    },
+                                    error: function(result) {
+                                        alert(result);
+                                    },
+                                    type: "GET"
+                                });
                             });
                          },
                 type: "GET"

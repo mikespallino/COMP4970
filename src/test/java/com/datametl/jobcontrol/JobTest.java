@@ -1,10 +1,10 @@
 package com.datametl.jobcontrol;
 
+import com.datametl.logging.Logger;
 import com.datametl.tasks.ExampleTask;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -15,6 +15,7 @@ import static org.junit.Assert.*;
  */
 public class JobTest {
     private Vector<SubJob> subJobs;
+    private Logger log;
 
     @Before
     public void setUp() {
@@ -26,13 +27,13 @@ public class JobTest {
 
     @Test
     public void run() throws Exception {
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         job.start();
     }
 
     @Test
     public void start() throws Exception {
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         boolean val = job.start();
         assertTrue(val);
         assertEquals(JobState.RUNNING, job.getState());
@@ -42,7 +43,7 @@ public class JobTest {
 
     @Test
     public void stop() throws Exception {
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         job.start();
         boolean val = job.stop();
         assertTrue(val);
@@ -52,7 +53,7 @@ public class JobTest {
 
     @Test
     public void restart() throws Exception {
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         boolean val = job.restart();
         assertTrue(val);
         assertEquals(JobState.RUNNING, job.getState());
@@ -62,7 +63,7 @@ public class JobTest {
 
     @Test
     public void kill() throws Exception {
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         job.start();
         boolean val = job.kill();
         assertTrue(val);
@@ -73,7 +74,7 @@ public class JobTest {
     public void addSubJob() throws Exception {
         // INFO: This test isn't that good. It's dependent on tasks not completing before inserting another
         //        maybe we should come up with a better test?
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         job.start();
         assertEquals(3, job.getSubJobs().size());
         Thread.sleep(2000);
@@ -90,7 +91,7 @@ public class JobTest {
 
     @Test
     public void goodJobExecution() throws Exception {
-        Job job = new Job(this.subJobs, 3);
+        Job job = new Job(this.subJobs, 3, new Logger("Test"));
         boolean val1 = job.start();
         assertTrue(val1);
 
@@ -99,5 +100,4 @@ public class JobTest {
 
         assertEquals(JobState.SUCCESS, job.getState());
     }
-
 }

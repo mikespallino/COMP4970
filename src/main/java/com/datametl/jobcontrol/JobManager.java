@@ -2,6 +2,7 @@ package com.datametl.jobcontrol;
 
 import java.util.*;
 
+import com.datametl.logging.Logger;
 import com.datametl.tasks.DataSegmentationTask;
 import com.datametl.tasks.Task;
 import org.json.*;
@@ -16,24 +17,28 @@ public class JobManager implements Runnable {
     private Map<String, UUID> namedJobs;
     private Thread curThread;
     private Scheduler scheduler;
+    private Logger log;
 
     public JobManager() {
         jobs = new HashMap<UUID, Job>();
         namedJobs = new HashMap<String, UUID>();
         scheduler = new Scheduler();
+        log = new Logger("JobManager");
         curThread = new Thread(this, "JobManager");
         curThread.start();
     }
 
     //Path & file type has been altered
     public UUID addJob(String name, JSONObject uiData) {
+        UUID newId = UUID.randomUUID();
+        Logger newLogger = getNewLogger(newId);
+
         Vector<SubJob> subJobs = new Vector<SubJob>();
-        Task dst = new DataSegmentationTask(250);
+        Task dst = new DataSegmentationTask(250, newLogger);
         SubJob dstSubJob = new SubJob(dst);
         subJobs.add(dstSubJob);
-        Job job = new Job(subJobs, 3);
+        Job job = new Job(subJobs, 3, newLogger);
 
-        UUID newId = UUID.randomUUID();
         job.setETLPacket(uiData);
         if (name.equals("")) {
             name = newId.toString();
@@ -77,11 +82,11 @@ public class JobManager implements Runnable {
         jobIds.addAll(jobs.keySet());
         while (true) {
             if (jobSize == 0 || jobIndex > jobSize) {
-                System.out.println("No jobs...");
+                log.debug("No jobs...");
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ex) {
-                    System.out.println("Uh-oh");
+                    log.error("Uh-oh");
                 }
                 jobSize = jobs.size();
                 jobIds.clear();
@@ -94,19 +99,19 @@ public class JobManager implements Runnable {
             //TODO: update UI with job state info
             switch (curState) {
                 case FAILED:
-                    System.out.println("Job [" + curJobId + "] STATE: " + curState + " [RED]");
+                    log.info("Job [" + curJobId + "] STATE: " + curState + " [RED]");
                     break;
                 case KILLED:
-                    System.out.println("Job [" + curJobId + "] STATE: " + curState + "  [BLACK]");
+                    log.info("Job [" + curJobId + "] STATE: " + curState + "  [BLACK]");
                     break;
                 case NOT_STARTED:
-                    System.out.println("Job [" + curJobId + "] STATE: " + curState + "  [GRAY]");
+                    log.info("Job [" + curJobId + "] STATE: " + curState + "  [GRAY]");
                     break;
                 case RUNNING:
-                    System.out.println("Job [" + curJobId + "] STATE: " + curState + "  [YELLOW]");
+                    log.info("Job [" + curJobId + "] STATE: " + curState + "  [YELLOW]");
                     break;
                 case SUCCESS:
-                    System.out.println("Job [" + curJobId + "] STATE: " + curState + "  [GREEN]");
+                    log.info("Job [" + curJobId + "] STATE: " + curState + "  [GREEN]");
                     break;
                 default:
                     break;
@@ -114,7 +119,7 @@ public class JobManager implements Runnable {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
-                System.out.println("Uh-oh");
+                log.error("Uh-oh");
             }
             jobIndex++;
             jobSize = jobs.size();
@@ -153,12 +158,13 @@ public class JobManager implements Runnable {
 
     public void resubmit(UUID jobid, JSONObject packet) {
         removeJob(jobid);
+        Logger newLogger = new Logger(jobid.toString());
 
         Vector<SubJob> subJobs = new Vector<SubJob>();
-        Task dst = new DataSegmentationTask(250);
+        Task dst = new DataSegmentationTask(250, newLogger);
         SubJob dstSubJob = new SubJob(dst);
         subJobs.add(dstSubJob);
-        Job job = new Job(subJobs, 3);
+        Job job = new Job(subJobs, 3, newLogger);
         job.setETLPacket(packet);
 
         jobs.put(jobid, job);
@@ -166,5 +172,19 @@ public class JobManager implements Runnable {
 
     public void killScheduler() {
         scheduler.kill();
+    }
+
+    private Logger getNewLogger(UUID jobId) {
+        Logger newLogger = new Logger(jobId.toString());
+        return newLogger;
+    }
+
+    public String getLogs(UUID jobId) {
+        Job j = jobs.get(jobId);
+        if (j!= null) {
+            return j.getLogs();
+        } else {
+            return null;
+        }
     }
 }

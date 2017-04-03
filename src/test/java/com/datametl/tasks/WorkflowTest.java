@@ -4,6 +4,8 @@ import com.datametl.jobcontrol.Job;
 import com.datametl.jobcontrol.JobManager;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.LogLevel;
+import com.datametl.logging.Logger;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -57,12 +59,16 @@ public class WorkflowTest {
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
         JobManager manager = new JobManager();
+        Logger.setLogLevel(LogLevel.DEBUG);
         UUID jobId = manager.addJob("", etlPacket);
 
         manager.startJob(jobId);
         manager.stopJob(jobId);
 
         Thread.sleep(2000);
+
+        System.out.println(manager.getLogs(jobId));
+        assertNotEquals(manager.getLogs(jobId), "");
         assertEquals(manager.getJobState(jobId), JobState.SUCCESS);
     }
 

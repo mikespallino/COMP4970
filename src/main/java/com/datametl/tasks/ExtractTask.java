@@ -3,6 +3,7 @@ package com.datametl.tasks;
 import com.datametl.exception.JSONParsingException;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.Logger;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.json.JSONArray;
@@ -37,13 +38,15 @@ public class ExtractTask implements Task{
     private int docToRead;
     private long bytePos;
     private long lastBytePos;
+    private Logger log;
 
     /**
      * Constructor
      * <p>
      * Sets the returnCode to NOT_STARTED
      */
-    public ExtractTask() {
+    public ExtractTask(Logger log) {
+        this.log = log;
     }
 
 
@@ -82,7 +85,7 @@ public class ExtractTask implements Task{
         }
 
 //      Creates a new RulesEngineTask if extraction was successful
-        Task rules = new RulesEngineTask();
+        Task rules = new RulesEngineTask(log);
         SubJob newRulesSubJob = new SubJob(rules);
 
 //      INFO: Give RulesEngine a copy and reset the contents
@@ -231,7 +234,7 @@ public class ExtractTask implements Task{
                 if(randomAccessFile.getFilePointer()>= randomAccessFile.length()){
                     this.lastBytePos=randomAccessFile.getFilePointer();
                     this.etlPacket.put("current_byte_position",this.lastBytePos);
-                    System.out.println("END OF FILE - CLOSING");
+                    log.debug("END OF FILE - CLOSING");
                     randomAccessFile.close();
                     break;
                 }
@@ -391,10 +394,10 @@ public class ExtractTask implements Task{
                         }
                         break;
                     case XMLStreamConstants.START_ELEMENT:
-                        //System.out.println("XML Start Element");
+                        //log.debug("XML Start Element");
                         StartElement startElement = event.asStartElement();
                         String qName = startElement.getName().getLocalPart();
-                        //System.out.println(qName);
+                        //log.debug(qName);
                         if(this.etlPacket.has("rootTag")) {
                             if (startString.equals("")) {
                                 startString = qName;
@@ -496,6 +499,6 @@ public class ExtractTask implements Task{
 
 //  Debugging purposes
     private void readContent(){
-        System.out.println("READCONTENT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
+        log.debug("READCONTENT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
     }
 }

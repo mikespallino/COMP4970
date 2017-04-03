@@ -34,7 +34,6 @@ dependencies {
             "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
 }
 
-
 buildscript {
 
     repositories {

@@ -2,6 +2,7 @@ package com.datametl.tasks;
 
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,6 +25,11 @@ public class RulesEngineTask implements Task {
     private JSONArray newHeader;
     private JSONArray destinationHeader;
     private JSONArray sourceHeader;
+    private Logger log;
+
+    public RulesEngineTask(Logger log) {
+        this.log = log;
+    }
 
 
     /**
@@ -60,29 +66,24 @@ public class RulesEngineTask implements Task {
         //loop through each line
         for (int x =0; x<dataContents.length(); x++){
             JSONArray line = getLine(dataContents, x);
-            System.out.println("New Header: " + newHeader);
-            System.out.println("Pre Transform: " + line);
+            log.debug("New Header: " + newHeader);
+            log.debug("Pre Transform: " + line);
             if (!doFilters(line,filters)){
                 toDeleteList.add(toDeleteList.size(), x);
             }else {
                 line = doTransformations(transforms, line);
-                System.out.println("Pre Mapping: " + line);
+                log.debug("Pre Mapping: " + line);
                 line = doMappings(mappings, line, headersToKeep);
-                System.out.println("Current Line: " + line);
+                log.debug("Current Line: " + line);
                 dataContents.put(x, line);
             }
 
         }
         deleteUnwantedElements(dataContents, toDeleteList);
-        //System.out.println("THIS IS DATACONTENTS: " + dataContents);
+        log.debug("THIS IS DATACONTENTS: " + dataContents);
         pckt.getJSONObject("data").put("contents", dataContents);
-        //System.out.println(pckt);
-        //System.out.println("POST-Size of Data: " + dataContents.length());
-
-//        Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"));
-//        SubJob newExportSubJob = new SubJob(export);
-//        newExportSubJob.setETLPacket(new JSONObject(pckt.toString()));
-//        boolean status = parent.getParent().addSubJob(newExportSubJob);
+        log.debug(pckt.toString());
+        log.debug("POST-Size of Data: " + dataContents.length());
 
         current_state = JobState.SUCCESS;
     }
@@ -145,14 +146,14 @@ public class RulesEngineTask implements Task {
         for (int x=0; x<destinationHeader.length();x++){
             sendback.put(x,JSONObject.NULL);
         }
-        System.out.println("1 THIS IS SENDBACK: " + sendback);
+        log.debug("1 THIS IS SENDBACK: " + sendback);
         for (int x =0; x<toKeep.length();x++){
             String headerName = newHeader.getString(toKeep.getInt(x));
             int headerIndex = getArrayIndex(destinationHeader, headerName);
             sendback.put(headerIndex, line.get(toKeep.getInt(x)));
         }
 
-        System.out.println("2 THIS IS SENDBACK: " + sendback);
+        log.debug("2 THIS IS SENDBACK: " + sendback);
         Iterator<?> keys = mappings.keys();
         while (keys.hasNext()){
             String curMapping = (String)keys.next();
@@ -161,7 +162,7 @@ public class RulesEngineTask implements Task {
             int newFieldIndex = getArrayIndex(destinationHeader, newField);
             sendback.put(newFieldIndex, line.get(indexCurMapping));
         }
-        System.out.println("3 THIS IS SENDBACK: " + sendback);
+        log.debug("3 THIS IS SENDBACK: " + sendback);
 
         return sendback;
     }

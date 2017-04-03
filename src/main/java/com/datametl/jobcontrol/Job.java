@@ -1,5 +1,6 @@
 package com.datametl.jobcontrol;
 
+import com.datametl.logging.Logger;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -16,13 +17,15 @@ public class Job implements JobInterface, Runnable {
     private Thread curThread;
     private int curSubJob;
     private JSONObject packet;
+    private Logger log;
 
-    public Job(Vector<SubJob> subJobs, int retries) {
+    public Job(Vector<SubJob> subJobs, int retries, Logger log) {
         this.retries = retries;
         this.subJobs = subJobs;
         this.state = JobState.NOT_STARTED;
         this.curThread = new Thread(this);
         curSubJob = 0;
+        this.log = log;
         for (SubJob sub: subJobs) {
             sub.setParent(this);
         }
@@ -57,7 +60,7 @@ public class Job implements JobInterface, Runnable {
                     case KILLED:
                     case FAILED: {
                         while (currentRetryCount < retries) {
-                            System.out.println("Retrying...");
+                            log.info("Retrying...");
                             JobState returnState = sub.getTaskReturnCode();
 
                             if (returnState == JobState.FAILED || returnState == JobState.KILLED) {
@@ -103,7 +106,7 @@ public class Job implements JobInterface, Runnable {
             ex.printStackTrace();
             state = JobState.FAILED;
         }
-        System.out.println("Finishing job with status: " + state);
+        log.info("Finishing job with status: " + state);
     }
 
     public boolean start() {
@@ -162,5 +165,9 @@ public class Job implements JobInterface, Runnable {
 
     public void setETLPacket(JSONObject newPacket) {
         packet = newPacket;
+    }
+
+    public String getLogs() {
+        return log.getLogs();
     }
 }
