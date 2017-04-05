@@ -22,7 +22,9 @@ public class JobManager implements Runnable {
     public JobManager() {
         jobs = new HashMap<UUID, Job>();
         namedJobs = new HashMap<String, UUID>();
-        scheduler = new Scheduler();
+        scheduler = new Scheduler(this);
+        scheduler.readSavedWorkflows();
+        scheduler.start();
         log = new Logger("JobManager");
         curThread = new Thread(this, "JobManager");
         curThread.start();
@@ -39,10 +41,11 @@ public class JobManager implements Runnable {
         subJobs.add(dstSubJob);
         Job job = new Job(subJobs, 3, newLogger);
 
-        job.setETLPacket(uiData);
         if (name.equals("")) {
             name = newId.toString();
         }
+        uiData.put("name", name);
+        job.setETLPacket(uiData);
 
         for(String n : namedJobs.keySet()) {
             if (name.equals(n)) {
@@ -53,6 +56,17 @@ public class JobManager implements Runnable {
         jobs.put(newId, job);
         scheduler.saveWorkflow(newId, uiData);
         return newId;
+    }
+
+    public void addJobWithStatus(UUID jobId, JSONObject packet, JobState state) {
+        Vector<SubJob> subJobs = new Vector<SubJob>();
+        Job job = new Job(subJobs, 3, getNewLogger(jobId));
+        job.setState(state);
+        job.setETLPacket(packet);
+        String name = packet.getString("name");
+
+        namedJobs.put(name, jobId);
+        jobs.put(jobId, job);
     }
 
     public void removeJob(UUID oldJobId) {
@@ -133,7 +147,11 @@ public class JobManager implements Runnable {
 
     public boolean kill() {
         for(UUID id: jobs.keySet()) {
-            jobs.get(id).kill();
+            Job j = jobs.get(id);
+            JSONObject packet = j.getETLPacket();
+            packet.put("state", jobs.get(id).getState());
+            scheduler.saveWorkflow(id, packet);
+            j.kill();
         }
         killScheduler();
         curThread.interrupt();

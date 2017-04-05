@@ -159,6 +159,10 @@ public class Job implements JobInterface, Runnable {
         return state;
     }
 
+    public void setState(JobState state) {
+        this.state = state;
+    }
+
     public JSONObject getETLPacket() {
         return packet;
     }
