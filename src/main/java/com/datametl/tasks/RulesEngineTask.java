@@ -43,47 +43,57 @@ public class RulesEngineTask implements Task {
      * @see        Task
      */
     public void apply() {
+        try {
 
-        JSONObject pckt = parent.getETLPacket();
+            JSONObject pckt = parent.getETLPacket();
 
-        JSONObject rules = pckt.getJSONObject("rules");
-        JSONObject transforms = rules.getJSONObject("transformations");
-        JSONObject mappings = rules.getJSONObject("mappings");
-        JSONObject filters = rules.getJSONObject("filters");
-        JSONObject packetData = pckt.getJSONObject("data");
-        JSONArray dataContents = packetData.getJSONArray("contents");
-        this.sourceHeader = packetData.getJSONArray("source_header");
-        this.destinationHeader = packetData.getJSONArray("destination_header");
-        this.newHeader = sourceHeader;
-        List<Integer> toDeleteList = new ArrayList<Integer>();
+            JSONObject rules = pckt.getJSONObject("rules");
+            JSONObject transforms = rules.getJSONObject("transformations");
+            JSONObject mappings = rules.getJSONObject("mappings");
+            JSONObject filters = rules.getJSONObject("filters");
+            JSONObject packetData = pckt.getJSONObject("data");
+            JSONArray dataContents = packetData.getJSONArray("contents");
+            this.sourceHeader = packetData.getJSONArray("source_header");
+            this.destinationHeader = packetData.getJSONArray("destination_header");
+            this.newHeader = sourceHeader;
+            List<Integer> toDeleteList = new ArrayList<Integer>();
 
 
-        makeNewHeader(transforms, mappings);
+            makeNewHeader(transforms, mappings);
 
-        JSONArray headersToKeep = headerIndexesToKeep();
-        //System.out.println(headersToKeep);
+            JSONArray headersToKeep = headerIndexesToKeep();
+            //System.out.println(headersToKeep);
 
-        //loop through each line
-        for (int x =0; x<dataContents.length(); x++){
-            JSONArray line = getLine(dataContents, x);
-            log.debug("New Header: " + newHeader);
-            log.debug("Pre Transform: " + line);
-            if (!doFilters(line,filters)){
-                toDeleteList.add(toDeleteList.size(), x);
-            }else {
-                line = doTransformations(transforms, line);
-                log.debug("Pre Mapping: " + line);
-                line = doMappings(mappings, line, headersToKeep);
-                log.debug("Current Line: " + line);
-                dataContents.put(x, line);
+            //loop through each line
+            for (int x = 0; x < dataContents.length(); x++) {
+                JSONArray line = getLine(dataContents, x);
+                log.debug("New Header: " + newHeader);
+                log.debug("Pre Transform: " + line);
+                if (!doFilters(line, filters)) {
+                    toDeleteList.add(toDeleteList.size(), x);
+                } else {
+                    line = doTransformations(transforms, line);
+                    log.debug("Pre Mapping: " + line);
+                    line = doMappings(mappings, line, headersToKeep);
+                    log.debug("Current Line: " + line);
+                    dataContents.put(x, line);
+                }
+
             }
+            deleteUnwantedElements(dataContents, toDeleteList);
+            log.debug("THIS IS DATACONTENTS: " + dataContents);
+            pckt.getJSONObject("data").put("contents", dataContents);
+            log.debug(pckt.toString());
+            log.debug("POST-Size of Data: " + dataContents.length());
 
+            Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"));
+            SubJob newExportSubJob = new SubJob(export);
+            newExportSubJob.setETLPacket(new JSONObject(pckt.toString()));
+            boolean status = parent.getParent().addSubJob(newExportSubJob);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            current_state = JobState.KILLED;
         }
-        deleteUnwantedElements(dataContents, toDeleteList);
-        log.debug("THIS IS DATACONTENTS: " + dataContents);
-        pckt.getJSONObject("data").put("contents", dataContents);
-        log.debug(pckt.toString());
-        log.debug("POST-Size of Data: " + dataContents.length());
 
         current_state = JobState.SUCCESS;
     }

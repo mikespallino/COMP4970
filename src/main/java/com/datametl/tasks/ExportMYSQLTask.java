@@ -115,15 +115,21 @@ public class ExportMYSQLTask implements ExportInterface, Task {
     public void apply() {
         state = JobState.RUNNING;
 
-        etlPacket = parent.getETLPacket();
-        System.out.println("Connecting...");
-        initiateConnection();
-        System.out.println("Parsing contents...");
-        retrieveContents(etlPacket);
-        System.out.println("Exporting...");
-        exportToDSS();
-        System.out.println("Closing");
-        terminateConnection();
+        try {
+            etlPacket = parent.getETLPacket();
+            System.out.println("Connecting...");
+            initiateConnection();
+            System.out.println("Parsing contents...");
+            retrieveContents(etlPacket);
+            System.out.println("Exporting...");
+            exportToDSS();
+            System.out.println("Closing");
+            terminateConnection();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            state = JobState.KILLED;
+            return;
+        }
 
         state = JobState.SUCCESS;
     }

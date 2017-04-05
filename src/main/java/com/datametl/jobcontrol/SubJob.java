@@ -43,6 +43,7 @@ public class SubJob implements SubJobInterface, Runnable {
 
     public boolean kill() {
         curThread.interrupt();
+        curThread.stop();
         return true;
     }
 

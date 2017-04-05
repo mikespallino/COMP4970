@@ -83,6 +83,7 @@ public class CreateWorkflow extends HttpServlet {
         etlPacket.getJSONObject("destination").put("username", newRequestParams.get("username"));
         etlPacket.getJSONObject("destination").put("password", newRequestParams.get("password"));
         etlPacket.getJSONObject("destination").put("storage_type", newRequestParams.get("destination_type"));
+        etlPacket.getJSONObject("destination").put("destination_location", newRequestParams.get("destination_location"));
         JSONArray destinationHeader = new JSONArray();
         Object objHeader = newRequestParams.get("destination_schema");
         String header;

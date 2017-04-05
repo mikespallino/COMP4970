@@ -19,15 +19,15 @@ public class ExampleTask implements Task {
         returnCode = JobState.RUNNING;
         try {
             Thread.sleep(4000);
+            System.out.println("Did the thing!");
+
+            if (parent != null) {
+                System.out.println("Got my parent's ETL packet!: " + parent.getETLPacket());
+            }
         } catch (Exception ex) {
             returnCode = JobState.KILLED;
             ex.printStackTrace();
             return;
-        }
-        System.out.println("Did the thing!");
-
-        if (parent != null) {
-            System.out.println("Got my parent's ETL packet!: " + parent.getETLPacket());
         }
         returnCode = JobState.SUCCESS;
     }

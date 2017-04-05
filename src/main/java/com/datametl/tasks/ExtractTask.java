@@ -60,40 +60,45 @@ public class ExtractTask implements Task{
      */
     public void apply() {
 
+        try {
 //      Obtain necessary data from ETLPacket for extraction
-        this.returnCode = JobState.RUNNING;
-        this.etlPacket = parent.getETLPacket();
-        this.filePath = etlPacket.getJSONObject("source").getString("path");
-        this.fileType = etlPacket.getJSONObject("source").getString("file_type");
-        this.docToRead = etlPacket.getInt("documents_to_read");
-        this.bytePos = etlPacket.getLong("current_byte_position");
+            this.returnCode = JobState.RUNNING;
+            this.etlPacket = parent.getETLPacket();
+            this.filePath = etlPacket.getJSONObject("source").getString("path");
+            this.fileType = etlPacket.getJSONObject("source").getString("file_type");
+            this.docToRead = etlPacket.getInt("documents_to_read");
+            this.bytePos = etlPacket.getLong("current_byte_position");
 
 //      Determines which extraction method based on file type
 //      Sets JobState to failed if fileType was not specified
-        if(this.fileType.equals("csv")){
-            extractCSV();
-        }else if(this.fileType.equals("json")){
-            try {
-                extractJSON();
-            }catch(JSONParsingException e){
-                e.printStackTrace();
+            if (this.fileType.equals("csv")) {
+                extractCSV();
+            } else if (this.fileType.equals("json")) {
+                try {
+                    extractJSON();
+                } catch (JSONParsingException e) {
+                    e.printStackTrace();
+                }
+            } else if (this.fileType.equals("xml")) {
+                extractXML();
+            } else {
+                this.returnCode = JobState.FAILED;
             }
-        }else if(this.fileType.equals("xml")){
-            extractXML();
-        }else{
-            this.returnCode = JobState.FAILED;
-        }
 
 //      Creates a new RulesEngineTask if extraction was successful
-        Task rules = new RulesEngineTask(log);
-        SubJob newRulesSubJob = new SubJob(rules);
+            Task rules = new RulesEngineTask(log);
+            SubJob newRulesSubJob = new SubJob(rules);
 
 //      INFO: Give RulesEngine a copy and reset the contents
-        newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
-        JSONArray empty = new JSONArray();
-        etlPacket.getJSONObject("data").put("contents", empty);
+            newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
+            JSONArray empty = new JSONArray();
+            etlPacket.getJSONObject("data").put("contents", empty);
 
-        boolean status = parent.getParent().addSubJob(newRulesSubJob);
+            boolean status = parent.getParent().addSubJob(newRulesSubJob);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            returnCode = JobState.KILLED;
+        }
 
         returnCode = JobState.SUCCESS;
 
