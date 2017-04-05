@@ -2,6 +2,7 @@ package com.datametl.tasks;
 
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.Logger;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -16,11 +17,13 @@ public class DataSegmentationTask implements Task {
     private int documentsPerChunk;
     private long currentBytePosition;
     private long maxFilePosition;
+    private Logger log;
 
-    public DataSegmentationTask(int documentsPerChunk) {
+    public DataSegmentationTask(int documentsPerChunk, Logger log) {
         this.documentsPerChunk = documentsPerChunk;
         this.currentBytePosition = 0;
         this.maxFilePosition = 0;
+        this.log = log;
     }
 
     public void apply() {
@@ -40,16 +43,16 @@ public class DataSegmentationTask implements Task {
             throw new RuntimeException("Could not find file!");
         }
         maxFilePosition = fin.length();
-        System.out.println(maxFilePosition);
+        log.info("File bytes: " + maxFilePosition);
         etlPacket.put("documents_to_read", documentsPerChunk);
         etlPacket.put("current_byte_position", currentBytePosition);
         
-        Task extractTask = new ExtractTask();
+        Task extractTask = new ExtractTask(log);
         SubJob newExtractJob = new SubJob(extractTask);
         newExtractJob.setETLPacket(etlPacket);
         boolean status = parent.getParent().addSubJob(newExtractJob);
         if (status) {
-            System.out.println("Added initial ExtractSubJob");
+            log.info("Added initial ExtractSubJob");
         } else {
             returnCode = JobState.FAILED;
             throw new RuntimeException("Could not insert job in list!");
@@ -65,7 +68,7 @@ public class DataSegmentationTask implements Task {
             packetBytePosition = etlPacket.getLong("current_byte_position");
             if(currentBytePosition == packetBytePosition) {
                 try {
-                    System.out.println("waiting...");
+                    log.info("waiting...");
                     Thread.sleep(3000);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
@@ -77,15 +80,15 @@ public class DataSegmentationTask implements Task {
             if (currentBytePosition == maxFilePosition) {
                 break;
             }
-            System.out.println("Previous chunk done! Issuing new ExtractSubJob! bytes:" + currentBytePosition);
+            log.info("Previous chunk done! Issuing new ExtractSubJob! bytes:" + currentBytePosition);
             currentBytePosition = packetBytePosition;
-            ExtractTask nextChunkExtractTask = new ExtractTask();
+            ExtractTask nextChunkExtractTask = new ExtractTask(log);
             SubJob nextChunkExtractJob = new SubJob(nextChunkExtractTask);
             nextChunkExtractJob.setETLPacket(etlPacket);
             parent.getParent().addSubJob(nextChunkExtractJob);
         }
 
-        System.out.println("DataSegmentationTask - ETLPacket:\n"+etlPacket+"\n");
+        log.debug("DataSegmentationTask - ETLPacket:\n"+etlPacket+"\n");
 
         returnCode = JobState.SUCCESS;
     }

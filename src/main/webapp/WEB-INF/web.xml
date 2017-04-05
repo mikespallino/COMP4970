@@ -30,4 +30,9 @@
         <servlet-class>com.datametl.webapp.CancelWorkflow</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>GetLogs</servlet-name>
+        <servlet-class>com.datametl.webapp.GetLogs</servlet-class>
+    </servlet>
+
 </web-app>

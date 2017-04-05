@@ -1,6 +1,8 @@
 package com.datametl.webapp;
 
 import com.datametl.jobcontrol.JobManager;
+import com.datametl.logging.LogLevel;
+import com.datametl.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +23,7 @@ public class Index extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+        Logger.setLogLevel(LogLevel.DEBUG);
         manager = new JobManager();
     }
 

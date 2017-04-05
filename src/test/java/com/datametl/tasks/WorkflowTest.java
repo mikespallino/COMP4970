@@ -4,6 +4,8 @@ import com.datametl.jobcontrol.Job;
 import com.datametl.jobcontrol.JobManager;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.LogLevel;
+import com.datametl.logging.Logger;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -23,46 +25,53 @@ public class WorkflowTest {
     @Test
     public void run() throws Exception {
         String emptyPacketData = "{\n" +
-                "\t\"source\": {\n" +
-                "\t\t\"host_ip\": \"\",\n" +
-                "\t\t\"host_port\": 1234,\n" +
-                "\t\t\"path\": \"MOCK_DATA.csv\",\n" +
-                "\t\t\"file_type\": \"csv\"\n" +
-                "\t},\n" +
-                "\t\"rules\": {\n" +
-                "\t\t\"transformations\": {\n" +
-                "\t\t},\n" +
-                "\t\t\"mappings\": {\n" +
-                "\t\t\t\"id\": \"tester1\",\n" +
-                "\t\t\t\"first_name\": \"value\",\n" +
-                "\t\t\t\"last_name\": \"tester2\",\n" +
-                "\t\t\t\"email\": \"tester3\",\n" +
-                "\t\t},\n" +
-                "\t\t\"filters\": {\n" +
-                "\t\t}\n" +
-                "\t},\n" +
-                "\t\"destination\": {\n" +
-                "\t\t\"host_ip\": \"127.0.0.1\",\n" +
-                "\t\t\"host_port\": 9300,\n" +
-                "\t\t\"username\": \"mspallino\",\n" +
-                "\t\t\"password\": \"\",\n" +
-                "\t\t\"storage_type\": \"elasticsearch\",\n" +
-                "\t\t\"destination_location\": \"elasticsearch_archon.test.record\"\n" +
-                "\t},\n" +
-                "\t\"data\": {\n" +
-                "\t\t\"source_header\": \"\",\n" +
-                "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\", \"new\", \"value\"],\n" +
-                "\t\t\"contents\": [],\n" +
-                "\t}\n" +
+                "  \"schedule\": \"\",\n" +
+                "  \"data\": {\n" +
+                "    \"destination_header\": [\n" +
+                "      \"tester1\",\n" +
+                "      \"tester2\",\n" +
+                "      \"tester3\",\n" +
+                "      \"desty4\",\n" +
+                "      \"new\",\n" +
+                "      \"value\"\n" +
+                "    ],\n" +
+                "    \"contents\": [],\n" +
+                "    \"source_header\": \"\"\n" +
+                "  },\n" +
+                "  \"destination\": {\n" +
+                "    \"storage_type\": \"mysql\",\n" +
+                "    \"host_ip\": \"127.0.0.1\",\n" +
+                "    \"password\": \"test\",\n" +
+                "    \"host_port\": \"3306\",\n" +
+                "    \"username\": \"root\"\n" +
+                "  },\n" +
+                "  \"name\": \"171c1e33-b330-4677-b271-df44bbc25c66\",\n" +
+                "  \"rules\": {\n" +
+                "    \"mappings\": {},\n" +
+                "    \"transformations\": {},\n" +
+                "    \"filters\": {}\n" +
+                "  },\n" +
+                "  \"source\": {\n" +
+                "    \"path\": \"/Users/mspallino/School/Senior Year/Spring 2017/Software Engineering/Project/DataMETL/MOCK_DATA.csv\",\n" +
+                "    \"host_ip\": null,\n" +
+                "    \"host_port\": null,\n" +
+                "    \"file_type\": \"csv\"\n" +
+                "  },\n" +
+                "  \"time\": \"\",\n" +
+                "  \"state\": \"NOT_STARTED\"\n" +
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
         JobManager manager = new JobManager();
+        Logger.setLogLevel(LogLevel.DEBUG);
         UUID jobId = manager.addJob("", etlPacket);
 
         manager.startJob(jobId);
         manager.stopJob(jobId);
 
         Thread.sleep(2000);
+
+        System.out.println(manager.getLogs(jobId));
+        assertNotEquals(manager.getLogs(jobId), "");
         assertEquals(manager.getJobState(jobId), JobState.SUCCESS);
     }
 

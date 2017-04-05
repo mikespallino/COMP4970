@@ -13,10 +13,11 @@ import java.util.*;
 public class Scheduler implements Runnable {
 
     private Thread curThread;
+    private JobManager manager;
 
-    public Scheduler() {
+    public Scheduler(JobManager manager) {
+        this.manager = manager;
         curThread = new Thread(this, "Scheduler");
-        curThread.start();
     }
 
     public void saveWorkflow(UUID jobId, JSONObject etlPacket) {
@@ -51,6 +52,48 @@ public class Scheduler implements Runnable {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public void readSavedWorkflows() {
+        try {
+            File dir = new File("workflows");
+            if (dir.exists()) {
+                File[] directoryContents = dir.listFiles();
+                if (directoryContents != null) {
+                    for (File f : directoryContents) {
+                        String fileName = f.getName();
+                        if (fileName.endsWith(".json")) {
+                            UUID jobId = UUID.fromString(fileName.split(".json")[0]);
+                            InputStreamReader isr = new InputStreamReader(new FileInputStream(f));
+                            BufferedReader br = new BufferedReader(isr);
+                            StringBuffer buff = new StringBuffer();
+                            String data;
+                            while ((data = br.readLine()) != null) {
+                                buff.append(data);
+                            }
+                            JSONObject packet = new JSONObject(buff.toString());
+                            String stringState = packet.getString("state");
+                            JobState state = null;
+                            if (stringState.equals("NOT_STARTED")) {
+                                state = JobState.NOT_STARTED;
+                            } else if (stringState.equals("RUNNING")) {
+                                state = JobState.RUNNING;
+                            } else if (stringState.equals("SUCCESS")) {
+                                state = JobState.SUCCESS;
+                            } else if (stringState.equals("FAILED")) {
+                                state = JobState.FAILED;
+                            } else if (stringState.equals("KILLED")) {
+                                state = JobState.KILLED;
+                            }
+                            manager.addJobWithStatus(jobId, packet, state);
+                        }
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     public void poll() {
@@ -122,6 +165,10 @@ public class Scheduler implements Runnable {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void start() {
+        curThread.start();
     }
 
     public void run() {
