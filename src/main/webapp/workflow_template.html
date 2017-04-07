@@ -4,59 +4,69 @@
             <div class="form-group">
                 <h3>Source</h3>
             </div>
-            <hr/>
+            <hr class="title-break"/>
             <div class="form-group">
-                Path: <input type="text" class="form-control" name="source" id="source" placeholder="/users/Tests/Data/identities.csv">
+                <div class="datametl-input-label">Path:</div><input type="text" class="form-control" name="source" id="source" placeholder="/users/Tests/Data/identities.csv">
             </div>
-            File Type: <select name="source_type" id="source_type" class="form-control">
-            <option value="csv">CSV</option>
-            <option value="xml">XML</option>
-            <option value="json">JSON</option>
-        </select>
+            <div class="form-group">
+                <div class="datametl-input-label">File Type:</div>
+                <select name="source_type" class="form-control datametl-input">
+                    <option value="csv">CSV</option>
+                    <option value="xml">XML</option>
+                    <option value="json">JSON</option>
+                </select>
+            </div>
         </div>
         <div class="datametlinputbox" id="destination-config">
             <div class="form-group">
                 <h3>Destination Data Storage System</h3>
             </div>
-            <hr/>
-            Type: <select name="destination_type" id="destination_type"class="form-control">
-                <option value="mysql">MySQL</option>
-                <option value="postgres">PostgreSQL</option>
-                <option value="solr">Solr</option>
-                <option value="elasticsearch">ElasticSearch</option>
-            </select>
+            <hr class="title-break"/>
             <div class="form-group">
-                Port: <input type="text" class="form-control" name="destination_port" id="destination_port"placeholder="8080">
+                <div class="datametl-input-label">Type:</div>
+                <select name="destination_type" class="form-control datametl-input">
+                    <option value="mysql">MySQL</option>
+                    <option value="postgres">PostgreSQL</option>
+                    <option value="solr">Solr</option>
+                    <option value="elasticsearch">ElasticSearch</option>
+                </select>
             </div>
             <div class="form-group">
-                Server Address: <input type="text" class="form-control" name="destination_ip" id="destination_ip" placeholder="192.168.30.2">
+                <div class="datametl-input-label">Port:</div><input type="text" class="form-control datametl-input" name="destination_port" id="destination_port" placeholder="8080">
             </div>
             <div class="form-group">
-                Storage Location: <input type="text" class="form-control" name="destination_location" id="destination_location" placeholder="clientinformation">
+                <div class="datametl-input-label">Server Address:</div><input type="text" class="form-control datametl-input" name="destination_ip" id="destination_ip" placeholder="192.168.30.2">
             </div>
             <div class="form-group">
-                Storage Schema: <input type="text" class="form-control" name="destination_schema" id="destination_schema" placeholder="rowNum,firstName,email">
+                <div class="datametl-input-label">Storage Location:</div><input type="text" class="form-control datametl-input" name="destination_location" id="destination_location" placeholder="schema.table">
+                <i class="glyphicon glyphicon-question-sign" id="location-help" data-toggle="modal" data-target=".datametl-location-modal"></i>
             </div>
             <div class="form-group">
-                Username: <input type="text" class="form-control" name="username" id="username" placeholder="dev22">
+                <div class="datametl-input-label">Storage Schema:</div><input type="text" class="form-control datametl-input" name="destination_schema" id="destination_schema" placeholder="rowNum,firstName,email">
+                <i class="glyphicon glyphicon-question-sign" id="schema-help" data-toggle="modal" data-target=".datametl-schema-modal"></i>
             </div>
             <div class="form-group">
-                Password: <input type="text" class="form-control" name="password" id="password" placeholder="d@t@M1n3">
+                <div class="datametl-input-label">Username:</div><input type="text" class="form-control datametl-input" name="username" id="username" placeholder="dev22">
+            </div>
+            <div class="form-group">
+                <div class="datametl-input-label">Password:</div><input type="password" class="form-control datametl-input" name="password" id="password" placeholder="d@t@M1n3">
             </div>
         </div>
         <div class="datametlinputbox" id="execution-config">
             <div class="form-group">
                 <h3>Execution</h3>
             </div>
-            <hr/>
+            <hr class="title-break"/>
             <div class="form-group">
-                Time: <input type="text" class="form-control" name="time" id="time"placeholder="12:00">
+                <div class="datametl-input-label">Time:</div><input type="text" class="form-control datametl-input" name="time" id="time" placeholder="12:00">
+                <i class="glyphicon glyphicon-question-sign" id="time-help" data-toggle="modal" data-target=".datametl-time-modal"></i>
             </div>
             <div class="form-group">
-                Schedule: <input type="text" class="form-control" name="schedule" id="schedule" placeholder="Mon,Tue,Wed,Thu,Fri">
+                <div class="datametl-input-label">Schedule:</div><input type="text" class="form-control datametl-input" name="schedule" id="schedule" placeholder="Mon,Wed,Fri">
+                <i class="glyphicon glyphicon-question-sign" id="schedule-help" data-toggle="modal" data-target=".datametl-schedule-modal"></i>
             </div>
             <div class="form-group">
-                Workflow Name: <input type="text" class="form-control" name="name" id="name" placeholder="Kill me.">
+                <div class="datametl-input-label">Workflow Name:</div><input type="text" class="form-control datametl-input" name="name" id="name" placeholder="Contact Info MWF">
             </div>
             <button type="button" class="btn btn-success" id="executeButton" style="float:right;">Run</button>
         </div>
@@ -67,7 +77,7 @@
                 <h3>Transformations</h3>
                 <button type="button" class="btn btn-primary inputbox-more" id="transform-new" style="margin-left: 450px;">New</button>
             </div>
-            <hr/>
+            <hr class="title-break"/>
             <div id="transforms" class="datametl-scrollbox"></div>
         </div>
         <div class="datametlinputbox">
@@ -75,7 +85,7 @@
                 <h3>Mapping</h3>
                 <button type="button" class="btn btn-primary inputbox-more" id="mapping-new" style="margin-left: 530px;">New</button>
             </div>
-            <hr/>
+            <hr class="title-break"/>
             <div id="mapping" class="datametl-scrollbox"></div>
         </div>
         <div class="datametlinputbox">
@@ -83,9 +93,8 @@
                 <h3>Filtering</h3>
                 <button type="button" class="btn btn-primary inputbox-more" id="filter-new" style="margin-left: 538px;">New</button>
             </div>
-            <hr/>
+            <hr class="title-break"/>
             <div id="filters" class="datametl-scrollbox"></div>
         </div>
     </div>
 </form>
-<script src="static/js/main.js"></script>

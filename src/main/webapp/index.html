@@ -51,59 +51,69 @@
                                 <div class="form-group">
                                     <h3>Source</h3>
                                 </div>
-                                <hr/>
+                                <hr class="title-break"/>
                                 <div class="form-group">
-                                    Path: <input type="text" class="form-control" name="source" placeholder="/users/Tests/Data/identities.csv">
+                                    <div class="datametl-input-label">Path:</div><input type="text" class="form-control" name="source" placeholder="/users/Tests/Data/identities.csv">
                                 </div>
-                                File Type: <select name="source_type" class="form-control">
-                                <option value="csv">CSV</option>
-                                <option value="xml">XML</option>
-                                <option value="json">JSON</option>
-                            </select>
+                                <div class="form-group">
+                                    <div class="datametl-input-label">File Type:</div>
+                                    <select name="source_type" class="form-control datametl-input">
+                                        <option value="csv">CSV</option>
+                                        <option value="xml">XML</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="datametlinputbox">
                                 <div class="form-group">
                                     <h3>Destination Data Storage System</h3>
                                 </div>
-                                <hr/>
-                                Type: <select name="destination_type" class="form-control">
-                                <option value="mysql">MySQL</option>
-                                <option value="postgres">PostgreSQL</option>
-                                <option value="solr">Solr</option>
-                                <option value="elasticsearch">ElasticSearch</option>
-                            </select>
+                                <hr class="title-break"/>
                                 <div class="form-group">
-                                    Port: <input type="text" class="form-control" name="destination_port" placeholder="8080">
+                                    <div class="datametl-input-label">Type:</div>
+                                    <select name="destination_type" class="form-control datametl-input">
+                                        <option value="mysql">MySQL</option>
+                                        <option value="postgres">PostgreSQL</option>
+                                        <option value="solr">Solr</option>
+                                        <option value="elasticsearch">ElasticSearch</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
-                                    Server Address: <input type="text" class="form-control" name="destination_ip" placeholder="192.168.30.2">
+                                    <div class="datametl-input-label">Port:</div><input type="text" class="form-control datametl-input" name="destination_port" placeholder="8080">
                                 </div>
                                 <div class="form-group">
-                                    Storage Location: <input type="text" class="form-control" name="destination_location" placeholder="clientinformation">
+                                    <div class="datametl-input-label">Server Address:</div><input type="text" class="form-control datametl-input" name="destination_ip" placeholder="192.168.30.2">
                                 </div>
                                 <div class="form-group">
-                                    Storage Schema: <input type="text" class="form-control" name="destination_schema" placeholder="rowNum,firstName,email">
+                                    <div class="datametl-input-label">Storage Location:</div><input type="text" class="form-control datametl-input" name="destination_location" placeholder="schema.table">
+                                    <i class="glyphicon glyphicon-question-sign" id="location-help" data-toggle="modal" data-target=".datametl-location-modal"></i>
                                 </div>
                                 <div class="form-group">
-                                    Username: <input type="text" class="form-control" name="username" placeholder="dev22">
+                                    <div class="datametl-input-label">Storage Schema:</div><input type="text" class="form-control datametl-input" name="destination_schema" placeholder="rowNum,firstName,email">
+                                    <i class="glyphicon glyphicon-question-sign" id="schema-help" data-toggle="modal" data-target=".datametl-schema-modal"></i>
                                 </div>
                                 <div class="form-group">
-                                    Password: <input type="text" class="form-control" name="password" placeholder="d@t@M1n3">
+                                    <div class="datametl-input-label">Username:</div><input type="text" class="form-control datametl-input" name="username" placeholder="dev22">
+                                </div>
+                                <div class="form-group">
+                                    <div class="datametl-input-label">Password:</div><input type="password" class="form-control datametl-input" name="password" placeholder="d@t@M1n3">
                                 </div>
                             </div>
                             <div class="datametlinputbox">
                                 <div class="form-group">
                                     <h3>Execution</h3>
                                 </div>
-                                <hr/>
+                                <hr class="title-break"/>
                                 <div class="form-group">
-                                    Time: <input type="text" class="form-control" name="time" placeholder="12:00">
+                                    <div class="datametl-input-label">Time:</div><input type="text" class="form-control datametl-input" name="time" placeholder="12:00">
+                                    <i class="glyphicon glyphicon-question-sign" id="time-help" data-toggle="modal" data-target=".datametl-time-modal"></i>
                                 </div>
                                 <div class="form-group">
-                                    Schedule: <input type="text" class="form-control" name="schedule" placeholder="MTWRF">
+                                    <div class="datametl-input-label">Schedule:</div><input type="text" class="form-control datametl-input" name="schedule" placeholder="Mon,Wed,Fri">
+                                    <i class="glyphicon glyphicon-question-sign" id="schedule-help" data-toggle="modal" data-target=".datametl-schedule-modal"></i>
                                 </div>
                                 <div class="form-group">
-                                    Workflow Name: <input type="text" class="form-control" name="name" id="name" placeholder="Kill me.">
+                                    <div class="datametl-input-label">Workflow Name:</div><input type="text" class="form-control datametl-input" name="name" id="name" placeholder="Contact Info MWF">
                                 </div>
                                 <button type="button" class="btn btn-success" id="executeButton" style="float:right;">Run</button>
                             </div>
@@ -114,7 +124,7 @@
                                     <h3>Transformations</h3>
                                     <button type="button" class="btn btn-primary inputbox-more" id="transform-new" style="margin-left: 450px;">New</button>
                                 </div>
-                                <hr/>
+                                <hr class="title-break"/>
                                 <div id="transforms" class="datametl-scrollbox"></div>
                             </div>
                             <div class="datametlinputbox">
@@ -122,7 +132,7 @@
                                     <h3>Mapping</h3>
                                     <button type="button" class="btn btn-primary inputbox-more" id="mapping-new" style="margin-left: 530px;">New</button>
                                 </div>
-                                <hr/>
+                                <hr class="title-break"/>
                                 <div id="mapping" class="datametl-scrollbox"></div>
                             </div>
                             <div class="datametlinputbox">
@@ -130,7 +140,7 @@
                                     <h3>Filtering</h3>
                                     <button type="button" class="btn btn-primary inputbox-more" id="filter-new" style="margin-left: 538px;">New</button>
                                 </div>
-                                <hr/>
+                                <hr class="title-break"/>
                                 <div id="filters" class="datametl-scrollbox"></div>
                             </div>
                         </div>
@@ -139,7 +149,167 @@
             </div>
         </div>
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <!-- The following are just modal definitions -->
+        <div class="modal fade datametl-job-success-modal" id="jobSuccessModal" tabindex="-1" role="dialog" aria-labelledby="datametlJobSuccessNotif">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlJobSuccessNotif" style="color:green;">Success!</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Your job was started successfully! Check the In Progress tab to see it.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade datametl-job-fail-modal" id="jobFailModal" tabindex="-1" role="dialog" aria-labelledby="datametlJobFailNotif">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlJobFailNotif" style="color:red;">Uh-oh!</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>There is already a Job in the system with that name, please pick a new one!</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade datametl-location-modal"tabindex="-1" role="dialog" aria-labelledby="datametlLocationLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlLocationLabel">What is destination location?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Destination location refers to where DataMETL should put your data. Different storage systems have different layouts so DataMETL expects your input in a certain way here.</p>
+                        <p style="font-weight: bold;">These values must have the "." present.</p>
+                        <h4>MySQL</h4>
+                        <ul>
+                            <li>schema.table</li>
+                        </ul>
+                        <h4>PostgreSQL</h4>
+                        <ul>
+                            <li>schema.table</li>
+                        </ul>
+                        <h4>Solr</h4>
+                        <ul>
+                            <li>index.core</li>
+                        </ul>
+                        <h4>Elasticsearch</h4>
+                        <ul>
+                            <li>cluster.index.document_type</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade datametl-log-fail-modal" id="logFailModal" tabindex="-1" role="dialog" aria-labelledby="datametlLogFailNotif">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlLogFailNotif" style="color:red;">Uh-oh!</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>DataMETL failed to retrieve the log for this workflow, is it on disk? Check the logs folder!</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade datametl-schema-modal"tabindex="-1" role="dialog" aria-labelledby="datametlSchemaLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlSchemaLabel">What is destination schema?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Destination schema refers to the schema of the data storage system. (i.e. a MySQL table schema)</p>
+                        <p style="font-weight: bold;">The schema should be entered as a comma separated list.</p>
+                        <p>EX:</p>
+                        <ul>
+                            <li>customer_id,first_name,number_of_orders,most_recent_order</li>
+                            <li>contact,fname,lname,email</li>
+                            <li>item_id,product_name,product_category,price</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade datametl-time-modal"tabindex="-1" role="dialog" aria-labelledby="datametlTimeLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlTimeLabel">What is time?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>If this workflow is going to be scheduled to run on certain days, you must provide a time to execute it on those days.</p>
+                        <p style="font-weight: bold;">This must be used in conjunction with schedule.</p>
+                        <p style="font-weight: bold;">You must use 24:00 hour clock values.</p>
+                        <p>EX:</p>
+                        <ul>
+                            <li>01:00</li>
+                            <li>06:00</li>
+                            <li>18:00</li>
+                            <li>24:00</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade datametl-schedule-modal"tabindex="-1" role="dialog" aria-labelledby="datametlScheduleLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="datametlScheduleLabel">What is schedule?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Schedule means what day of the week DataMETL should execute this workflow.</p>
+                        <p style="font-weight: bold;">This must be used in conjunction with time.</p>
+                        <p style="font-weight: bold;">They should be entered as a comma separated list.</p>
+                        <p>The possible values are as follows: </p>
+                        <ul>
+                            <li>Sun</li>
+                            <li>Mon</li>
+                            <li>Tue</li>
+                            <li>Wed</li>
+                            <li>Thu</li>
+                            <li>Fri</li>
+                            <li>Sat</li>
+                        </ul>
+                        <p>EX: Mon,Wed,Friday</p>
+                        <p>This would run the workflow every Monday, Wednesday, and Friday.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="static/js/jquery.min.js"></script>
         <script src="static/js/bootstrap.min.js"></script>
         <script src="static/js/accordion.js"></script>
         <script src="static/js/main.js"></script>

@@ -64,6 +64,8 @@ public class GetWorkflows extends HttpServlet {
             out.println(statusJson.toString());
             return;
         } else if (requestedJob != null) {
+            System.out.println(requestedJob);
+            System.out.println(Index.manager.getJobByName(requestedJob).getETLPacket().toString());
             out.println(Index.manager.getJobByName(requestedJob).getETLPacket().toString());
             return;
         } else {

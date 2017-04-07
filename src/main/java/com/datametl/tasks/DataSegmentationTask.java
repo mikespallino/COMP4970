@@ -46,6 +46,7 @@ public class DataSegmentationTask implements Task {
             maxFilePosition = fin.length();
             log.info("File bytes: " + maxFilePosition);
             etlPacket.put("documents_to_read", documentsPerChunk);
+            etlPacket.put("max_byte_position", maxFilePosition);
             etlPacket.put("current_byte_position", currentBytePosition);
 
             Task extractTask = new ExtractTask(log);

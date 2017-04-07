@@ -58,6 +58,37 @@ public class JobManager implements Runnable {
         return newId;
     }
 
+    public UUID resubmitJob(String name, JSONObject uiData) {
+        System.out.println(name);
+        UUID jobId = namedJobs.get(name);
+        namedJobs.remove(name);
+        jobs.remove(jobId);
+
+        Logger newLogger = getNewLogger(jobId);
+
+        Vector<SubJob> subJobs = new Vector<SubJob>();
+        Task dst = new DataSegmentationTask(250, newLogger);
+        SubJob dstSubJob = new SubJob(dst);
+        subJobs.add(dstSubJob);
+        Job job = new Job(subJobs, 3, newLogger);
+
+        if (name.equals("")) {
+            name = jobId.toString();
+        }
+        uiData.put("name", name);
+        job.setETLPacket(uiData);
+
+        for(String n : namedJobs.keySet()) {
+            if (name.equals(n)) {
+                return null;
+            }
+        }
+        namedJobs.put(name, jobId);
+        jobs.put(jobId, job);
+        scheduler.saveWorkflow(jobId, uiData);
+        return jobId;
+    }
+
     public void addJobWithStatus(UUID jobId, JSONObject packet, JobState state) {
         Vector<SubJob> subJobs = new Vector<SubJob>();
         Job job = new Job(subJobs, 3, getNewLogger(jobId));
@@ -154,6 +185,7 @@ public class JobManager implements Runnable {
             j.kill();
         }
         killScheduler();
+        log.getLogs();
         curThread.interrupt();
         return true;
     }

@@ -2,9 +2,7 @@ package com.datametl.logging;
 
 import com.sun.javafx.binding.StringFormatter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,9 +20,24 @@ public class Logger {
     public Logger(String name) {
         this.name = name;
         builder = new StringBuilder();
-        builder.append("START LOG: ")
+        builder.append("\nSTART LOG: ")
                 .append(dateFormat.format(new Date()))
                 .append("\n===========================================\n");
+
+        File f = new File("logs/" + this.name + ".log");
+        if(f.exists()) {
+            try {
+                FileReader in = new FileReader(f);
+                BufferedReader br = new BufferedReader(in);
+                String data;
+                while ((data = br.readLine()) != null) {
+                    builder.append(data);
+                }
+                in.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     public synchronized void debug(String msg) {
@@ -84,6 +97,7 @@ public class Logger {
         try {
             FileWriter out = new FileWriter(f, true);
             out.append(logs);
+            out.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

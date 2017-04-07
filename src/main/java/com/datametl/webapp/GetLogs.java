@@ -22,7 +22,13 @@ public class GetLogs extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
         String requestedJob = request.getParameter("jobid");
-        String logs = Index.manager.getLogs(UUID.fromString(requestedJob));
+        UUID jobId;
+        try {
+            jobId = UUID.fromString(requestedJob);
+        } catch (java.lang.IllegalArgumentException ex) {
+            jobId = Index.manager.getNamedJobs().get(requestedJob);
+        }
+        String logs = Index.manager.getLogs(jobId);
         PrintWriter out = response.getWriter();
         out.println(logs);
         return;
