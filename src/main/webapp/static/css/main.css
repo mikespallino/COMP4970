@@ -86,7 +86,6 @@ button.inputbox-more {
 div.datametl-scrollbox {
     overflow-y: scroll;
     max-height:130px;
-    width: 95%;
     margin: 0 auto;
 }
 
