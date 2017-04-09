@@ -3,6 +3,7 @@ package com.datametl.tasks;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
 import com.datametl.jobcontrol.Job;
+import com.datametl.logging.Logger;
 
 /**
  * Created by mspallino on 1/18/17.
@@ -11,6 +12,7 @@ public class ExampleTask implements Task {
 
     private JobState returnCode = JobState.NOT_STARTED;
     private SubJob parent = null;
+    private Logger log;
 
     /**
      * This is just meant to be an example of how this "should" work.
@@ -19,10 +21,10 @@ public class ExampleTask implements Task {
         returnCode = JobState.RUNNING;
         try {
             Thread.sleep(4000);
-            System.out.println("Did the thing!");
+            log.info("Did the thing!");
 
             if (parent != null) {
-                System.out.println("Got my parent's ETL packet!: " + parent.getETLPacket());
+                log.info("Got my parent's ETL packet!: " + parent.getETLPacket());
             }
         } catch (Exception ex) {
             returnCode = JobState.KILLED;
@@ -42,5 +44,10 @@ public class ExampleTask implements Task {
 
     public SubJob getParent() {
         return parent;
+    }
+
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
     }
 }

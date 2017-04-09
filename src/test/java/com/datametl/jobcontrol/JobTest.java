@@ -21,7 +21,9 @@ public class JobTest {
     public void setUp() {
         subJobs = new Vector<SubJob>();
         for(int i = 0; i < 3; ++i) {
-            subJobs.add(new SubJob(new ExampleTask()));
+            ExampleTask t = new ExampleTask();
+            t.setLogger(new Logger("test"));
+            subJobs.add(new SubJob(t));
         }
     }
 
@@ -78,7 +80,9 @@ public class JobTest {
         job.start();
         assertEquals(3, job.getSubJobs().size());
         Thread.sleep(2000);
-        SubJob newSubJob = new SubJob(new ExampleTask());
+        ExampleTask t = new ExampleTask();
+        t.setLogger(new Logger("Test"));
+        SubJob newSubJob = new SubJob(t);
         job.addSubJob(newSubJob);
         assertEquals(4, job.getSubJobs().size());
         job.stop();

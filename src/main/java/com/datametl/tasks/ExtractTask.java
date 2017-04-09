@@ -131,6 +131,11 @@ public class ExtractTask implements Task{
         return parent;
     }
 
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
+    }
+
     /**
      * Parses through the CSV file by chunks and stores the data into arrays.
      * <p>

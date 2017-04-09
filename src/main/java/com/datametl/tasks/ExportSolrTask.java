@@ -2,6 +2,7 @@
 import java.lang.Object;
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -22,6 +23,7 @@ public class ExportSolrTask implements ExportInterface, Task {
     private JobState state;
     private SubJob parent;
     private JSONObject etlPacket;
+    private Logger log;
 
 
     public ExportSolrTask(){
@@ -43,7 +45,8 @@ public class ExportSolrTask implements ExportInterface, Task {
             conn.close();
         }
         catch (java.io.IOException e){
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
     public void retrieveContents(JSONObject packet) {
@@ -60,13 +63,16 @@ public class ExportSolrTask implements ExportInterface, Task {
                 doc = new SolrInputDocument();
             }
             catch(MalformedURLException e){
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
             catch(java.io.IOException e){
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
             catch(SolrServerException e){
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
@@ -76,13 +82,16 @@ public class ExportSolrTask implements ExportInterface, Task {
             conn.commit();
         }
         catch(MalformedURLException e){
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
         catch(java.io.IOException e){
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
         catch(SolrServerException e){
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
 
     }
@@ -91,13 +100,13 @@ public class ExportSolrTask implements ExportInterface, Task {
           state = JobState.RUNNING;
 
           etlPacket = parent.getETLPacket();
-          System.out.println("Connecting...");
+          log.info("Connecting...");
           initiateConnection();
-          System.out.println("Parsing...");
+          log.info("Parsing...");
           retrieveContents(etlPacket);
-          System.out.println("Exporting...");
+          log.info("Exporting...");
           exportToDSS();
-          System.out.println("Closing");
+          log.info("Closing");
           terminateConnection();
 
           state = JobState.SUCCESS;
@@ -114,4 +123,9 @@ public class ExportSolrTask implements ExportInterface, Task {
       public SubJob getParent() {
           return parent;
       }
+
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
+    }
 }

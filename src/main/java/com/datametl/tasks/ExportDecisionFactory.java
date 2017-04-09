@@ -1,6 +1,8 @@
 package com.datametl.tasks;
 
 
+import com.datametl.logging.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,10 +18,12 @@ public class ExportDecisionFactory {
 
     }
 
-    public Task pickExporter(String type) {
+    public Task pickExporter(String type, Logger log) {
         try {
             Class t = exporters.get(type);
-            return (Task) t.newInstance();
+            Task task = (Task) t.newInstance();
+            task.setLogger(log);
+            return task;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return null;

@@ -86,7 +86,7 @@ public class RulesEngineTask implements Task {
             log.debug(pckt.toString());
             log.debug("POST-Size of Data: " + dataContents.length());
 
-            Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"));
+            Task export = new ExportDecisionFactory().pickExporter(pckt.getJSONObject("destination").getString("storage_type"), log);
             SubJob newExportSubJob = new SubJob(export);
             newExportSubJob.setETLPacket(new JSONObject(pckt.toString()));
             boolean status = parent.getParent().addSubJob(newExportSubJob);
@@ -111,6 +111,11 @@ public class RulesEngineTask implements Task {
 
     public SubJob getParent() {
         return this.parent;
+    }
+
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
     }
 
     private JSONArray deleteUnwantedElements(JSONArray data, List<Integer> listToDelete){
