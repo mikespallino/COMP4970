@@ -86,6 +86,8 @@ public class Scheduler implements Runnable {
                                 state = JobState.KILLED;
                             }
                             manager.addJobWithStatus(jobId, packet, state);
+                            isr.close();
+                            br.close();
                         }
                     }
                 }
@@ -134,6 +136,8 @@ public class Scheduler implements Runnable {
                                         }
                                     }
                                 }
+                                isr.close();
+                                br.close();
                             }
                         }
                     } else {

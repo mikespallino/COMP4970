@@ -140,8 +140,9 @@ public class Job implements JobInterface, Runnable {
         for (SubJob sub: subJobs) {
             sub.kill();
         }
-        curThread.interrupt();
+        subJobs.clear();
         state = JobState.KILLED;
+        curThread.stop();
         return true;
     }
 

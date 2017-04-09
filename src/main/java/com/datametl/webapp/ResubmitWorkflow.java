@@ -13,13 +13,14 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-/**
- * Servlet for createworkflow
- */
-@WebServlet("/createworkflow")
-public class CreateWorkflow extends HttpServlet {
-    private static final long serialVersionUID = 1L;
 
+/**
+ * Created by mspallino on 4/6/17.
+ */
+
+@WebServlet("/resubmit")
+public class ResubmitWorkflow extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
     @Override
     protected void doPost(HttpServletRequest request,
@@ -133,22 +134,11 @@ public class CreateWorkflow extends HttpServlet {
         etlPacket.put("time", requestParams.get("time")[0]);
         etlPacket.put("name", name);
 
-        UUID id = Index.manager.addJob(name, etlPacket);
+        UUID id = Index.manager.resubmitJob(name, etlPacket);
         if (id == null) {
             response.sendError(400, "Job name already in use!");
             return;
         }
         Index.manager.startJob(id);
     }
-
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-    }
-
-    public void destroy() {
-        super.destroy();
-    }
-
 }

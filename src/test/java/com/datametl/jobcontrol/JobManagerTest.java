@@ -1,6 +1,8 @@
 package com.datametl.jobcontrol;
 
 import com.datametl.tasks.ExampleTask;
+import com.datametl.tasks.ExportDecisionFactory;
+import com.datametl.tasks.MockExporterTask;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +38,7 @@ public class JobManagerTest {
                 "    \"source_header\": \"\"\n" +
                 "  },\n" +
                 "  \"destination\": {\n" +
-                "    \"storage_type\": \"mysql\",\n" +
+                "    \"storage_type\": \"mock\",\n" +
                 "    \"host_ip\": \"127.0.0.1\",\n" +
                 "    \"password\": \"test\",\n" +
                 "    \"host_port\": \"3306\",\n" +
@@ -58,6 +60,7 @@ public class JobManagerTest {
                 "  \"state\": \"NOT_STARTED\"\n" +
                 "}";
         this.etlPacket = new JSONObject(emptyPacketData);
+        ExportDecisionFactory.addNewExporter("mock", MockExporterTask.class);
     }
 
     @Test

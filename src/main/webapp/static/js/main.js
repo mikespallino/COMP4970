@@ -59,7 +59,6 @@ $(document).ready(function() {
 
     var workflowHtml = '<div id="{0}"><button id="button-{0}"><h5>{0}</h5></button></div>';
 
-
     $('#transform-new').click(function () {
         $(transformHtml.format(transformCount)).appendTo('#transforms');
 
@@ -83,10 +82,10 @@ $(document).ready(function() {
         $.ajax({
                     url: "/DataMETL/createworkflow",
                     success: function(result){
-                                alert("Job is now running!");
+                                $('#jobSuccessModal').modal('show');
                              },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {
-                            alert("ERROR: A Job with than name already exists!");
+                            $('#jobFailModal').modal('show');
                            },
                     data: $("#createWorkflowForm").serialize(),
                     type: "POST"
@@ -103,7 +102,7 @@ $(document).ready(function() {
             $.ajax({
                         url: "/DataMETL/getworkflows",
                         success: function(result){
-                                    parseWorkflowResponse(result, '#inProgressLocation', 'In Progress Workflow', true);
+                                    parseWorkflowResponse(result, '#inProgressLocation', 'In Progress Workflow', true, false);
                                  },
                         data: {'status': 'RUNNING'},
                         type: "GET"
@@ -117,7 +116,7 @@ $(document).ready(function() {
             $.ajax({
                         url: "/DataMETL/getworkflows",
                         success: function(result){
-                                    parseWorkflowResponse(result, '#completeLocation', 'Completed Workflow', false);
+                                    parseWorkflowResponse(result, '#completeLocation', 'Completed Workflow', false, false);
                                  },
                         data: {'status': 'SUCCESS'},
                         type: "GET"
@@ -131,7 +130,7 @@ $(document).ready(function() {
             $.ajax({
                         url: "/DataMETL/getworkflows",
                         success: function(result){
-                                    parseWorkflowResponse(result, '#failedLocation', 'Failed Workflow', false);
+                                    parseWorkflowResponse(result, '#failedLocation', 'Failed Workflow', false, true);
                                  },
                         data: {'status': 'FAILED'},
                         type: "GET"
@@ -157,7 +156,7 @@ $(document).ready(function() {
             });
     }
 
-    function parseWorkflowResponse(result, divid, title, shouldMakeCancelButton) {
+    function parseWorkflowResponse(result, divid, title, shouldMakeCancelButton, shouldMakeEditButton) {
         var response = JSON.parse(result);
         var key;
         // Empty out the buttons every time
@@ -165,12 +164,12 @@ $(document).ready(function() {
         for(key in response){
             if(document.getElementById(key) == null) {
                 $(workflowHtml.format(key)).appendTo(divid);
-                makeWorkflowInfoButton(key, title + " - [" + key + "]", shouldMakeCancelButton);
+                makeWorkflowInfoButton(key, title + " - [" + key + "]", shouldMakeCancelButton, shouldMakeEditButton);
             }
         }
     }
 
-    function makeWorkflowInfoButton(jobid, title, shouldMakeCancelButton) {
+    function makeWorkflowInfoButton(jobid, title, shouldMakeCancelButton, shouldMakeEditButton) {
         var transformPacketCount = 0;
         var mappingPacketCount = 0;
         var filterPacketCount = 0;
@@ -181,8 +180,12 @@ $(document).ready(function() {
                 success: function(result){
                             $('#datametl-page').html("");
                             $('#datametl-page').load('workflow_template.html', function() {
+                                var response = JSON.parse(result);
+
                                 if(shouldMakeCancelButton == true) {
-                                    $('<div style="width: 100%;"><h3>{0}</h3></div><button type="button" class="btn btn-danger" id="cancelButton" style="float:right;">Cancel</button><br/><br/><br/>'.format(title, jobid)).insertBefore('#createWorkflowForm');
+                                    var percent = response['current_byte_position'] / response['max_byte_position'] * 100;
+
+                                    $('<div class="form-group"><div style="width: 80%;"><h3>{0} - {1}%</h3></div><button type="button" class="btn btn-danger" id="cancelButton" style="float:right;margin-left:20px;">Cancel</button><br/><br/><br/></div>'.format(title, percent)).insertBefore('#createWorkflowForm');
                                     $('#cancelButton').click(function() {
                                         $.ajax({
                                                     url: "cancelworkflow?jobid={0}".format(jobid),
@@ -192,6 +195,35 @@ $(document).ready(function() {
                                                     type: 'GET'
                                                 });
                                     });
+                                } else if (shouldMakeEditButton == true) {
+                                    $('<div class="form-group"><div style="width: 80%;"><h3>{0}</h3></div><button type="button" class="btn btn-basic" id="editButton" style="float:right;margin-left:20px;">Edit</button><br/><br/><br/></div>'.format(title)).insertBefore('#createWorkflowForm');
+                                    $('#editButton').click(function() {
+                                        $('#executeButton').prop('disabled', false);
+                                        $('#transform-new').prop('disabled', false);
+                                        $('#mapping-new').prop('disabled', false);
+                                        $('#filter-new').prop('disabled', false);
+                                        $('#source-config').find('*').prop('disabled', false);
+                                        $('#destination-config').find('*').prop('disabled', false);
+                                        $('#execution-config').find('*').prop('disabled', false);
+
+                                        $('#transformGroup'+transformPacketCount).find('*').prop('disabled', false);
+                                        $('#mappingGroup'+mappingPacketCount).find('*').prop('disabled', false);
+                                        $('#filterGroup'+filterPacketCount).find('*').prop('disabled', false);
+
+                                        $('#executeButton').click(function () {
+                                                $.ajax({
+                                                            url: "/DataMETL/resubmit",
+                                                            success: function(result){
+                                                                        $('#jobSuccessModal').modal('show');
+                                                                     },
+                                                            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                                                    $('#jobFailModal').modal('show');
+                                                                   },
+                                                            data: $("#createWorkflowForm").serialize(),
+                                                            type: "POST"
+                                                       });
+                                            });
+                                    });
                                 } else {
                                     $('<div style="width: 100%;"><h3>{0}</h3></div><br/><br/><br/>'.format(title)).insertBefore('#createWorkflowForm');
                                 }
@@ -200,7 +232,6 @@ $(document).ready(function() {
                                 $('#mapping-new').prop('disabled', true);
                                 $('#filter-new').prop('disabled', true);
 
-                                var response = JSON.parse(result);
                                 var source = response['source'];
                                 var rules = response['rules'];
                                 var destination = response['destination'];
@@ -263,7 +294,7 @@ $(document).ready(function() {
                                         $('#logs').text(result);
                                     },
                                     error: function(result) {
-                                        alert(result);
+                                        $('#logFailModal').modal('show');
                                     },
                                     type: "GET"
                                 });

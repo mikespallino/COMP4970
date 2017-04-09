@@ -1,22 +1,35 @@
 package com.datametl.tasks;
 
-import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExportDecisionFactory {
 
+    private static Map<String, Class> exporters = new HashMap<>();
+
+    public ExportDecisionFactory() {
+        exporters.put("mysql", ExportMYSQLTask.class);
+        exporters.put("postgresql", ExportPostgreSQLTask.class);
+        exporters.put("solr", ExportSolrTask.class);
+        exporters.put("elasticsearch", ExportElasticSearchTask.class);
+
+    }
+
     public Task pickExporter(String type) {
-        if(type.equals("mysql")) {
-            return new ExportMYSQLTask();
-        } else if(type.equals("postgresql")) {
-            return new ExportPostgreSQLTask();
-        } else if(type.equals("solr")) {
-            return new ExportSolrTask();
-        } else if(type.equals("elasticsearch")) {
-            return new ExportElasticSearchTask();
-        } else {
-            // Add a mapping to this for supporting a new Data Storage System
+        try {
+            Class t = exporters.get(type);
+            return (Task) t.newInstance();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
             return null;
         }
+    }
+
+    public static void addNewExporter(String type, Class newExporter) {
+        exporters.put(type, newExporter);
     }
 }

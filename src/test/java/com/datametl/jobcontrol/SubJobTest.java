@@ -69,8 +69,10 @@ public class SubJobTest {
         SubJob test = new SubJob(this.exampleTask);
         test.start();
         assertTrue(test.isRunning());
+        System.out.println("Waiting to kill...");
+        Thread.sleep(2000);
         test.kill();
-        Thread.sleep(500);
+        Thread.sleep(5000);
         assertEquals(JobState.KILLED, test.getTaskReturnCode());
     }
 
