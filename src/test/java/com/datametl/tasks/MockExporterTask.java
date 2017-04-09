@@ -2,6 +2,7 @@ package com.datametl.tasks;
 
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.Logger;
 import org.json.JSONObject;
 
 /**
@@ -55,5 +56,10 @@ public class MockExporterTask implements Task, ExportInterface {
     @Override
     public SubJob getParent() {
         return parent;
+    }
+
+    @Override
+    public void setLogger(Logger log) {
+
     }
 }

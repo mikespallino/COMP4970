@@ -2,6 +2,7 @@
 
   import com.datametl.jobcontrol.JobState;
   import com.datametl.jobcontrol.SubJob;
+  import com.datametl.logging.Logger;
   import org.elasticsearch.action.index.IndexResponse;
   import org.elasticsearch.client.Client;
   import org.elasticsearch.client.transport.TransportClient;
@@ -32,6 +33,7 @@ public class ExportElasticSearchTask implements ExportInterface, Task {
       private SubJob parent;
       private JSONObject etlPacket;
       private ArrayList<JSONObject> book = new ArrayList<JSONObject>();
+      private Logger log;
 
       public ExportElasticSearchTask() {
           state = JobState.NOT_STARTED;
@@ -53,7 +55,8 @@ public class ExportElasticSearchTask implements ExportInterface, Task {
               client = new PreBuiltTransportClient(settings)
                       .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host_address), host_port));
           } catch (UnknownHostException ex) {
-              ex.printStackTrace();
+              log.error(ex.getMessage());
+              throw new RuntimeException("Failed to get connection.");
           }
       }
 
@@ -91,13 +94,13 @@ public class ExportElasticSearchTask implements ExportInterface, Task {
           state = JobState.RUNNING;
 
           etlPacket = parent.getETLPacket();
-          System.out.println("Connecting...");
+          log.info("Connecting...");
           initiateConnection();
-          System.out.println("Parsing contents...");
+          log.info("Parsing contents...");
           retrieveContents(etlPacket);
-          System.out.println("Exporting...");
+          log.info("Exporting...");
           exportToDSS();
-          System.out.println("Closing");
+          log.info("Closing");
           terminateConnection();
 
           state = JobState.SUCCESS;
@@ -114,4 +117,9 @@ public class ExportElasticSearchTask implements ExportInterface, Task {
       public SubJob getParent() {
           return parent;
       }
+
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
+    }
 }

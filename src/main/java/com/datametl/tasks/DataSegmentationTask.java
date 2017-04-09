@@ -34,6 +34,7 @@ public class DataSegmentationTask implements Task {
             String filePath;
             if (path == null || path == JSONObject.NULL) {
                 returnCode = JobState.FAILED;
+                log.error("Could not find file!" + path);
                 throw new RuntimeException("Could not find file!");
             } else {
                 filePath = (String) path;
@@ -41,6 +42,7 @@ public class DataSegmentationTask implements Task {
             File fin = new File(filePath);
             if (fin.exists() == false) {
                 returnCode = JobState.FAILED;
+                log.error("Could not find file!" + path);
                 throw new RuntimeException("Could not find file!");
             }
             maxFilePosition = fin.length();
@@ -109,5 +111,10 @@ public class DataSegmentationTask implements Task {
 
     public SubJob getParent() {
         return parent;
+    }
+
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
     }
 }

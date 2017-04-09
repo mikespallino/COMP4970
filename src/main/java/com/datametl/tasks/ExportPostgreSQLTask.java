@@ -2,6 +2,7 @@ package com.datametl.tasks;
 
 import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
+import com.datametl.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -20,6 +21,7 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
     private SubJob parent;
     private JSONObject etlPacket;
     private Statement stmt = null;
+    private Logger log;
 
     public ExportPostgreSQLTask() {
         columns = new StringBuilder();
@@ -38,7 +40,8 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
         try {
             conn = DriverManager.getConnection(host_address, username, password);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -47,7 +50,8 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
@@ -93,7 +97,8 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
 
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -101,12 +106,14 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
         try {
             stmt.executeBatch();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         } finally {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
@@ -115,13 +122,13 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
         state = JobState.RUNNING;
 
         etlPacket = parent.getETLPacket();
-        System.out.println("Connecting...");
+        log.info("Connecting...");
         initiateConnection();
-        System.out.println("Parsing contents...");
+        log.info("Parsing contents...");
         retrieveContents(etlPacket);
-        System.out.println("Exporting...");
+        log.info("Exporting...");
         exportToDSS();
-        System.out.println("Closing");
+        log.info("Closing");
         terminateConnection();
 
         state = JobState.SUCCESS;
@@ -137,5 +144,10 @@ public class ExportPostgreSQLTask implements ExportInterface, Task {
 
     public SubJob getParent() {
         return parent;
+    }
+
+    @Override
+    public void setLogger(Logger log) {
+        this.log = log;
     }
 }

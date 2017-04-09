@@ -1,5 +1,6 @@
 package com.datametl.jobcontrol;
 
+import com.datametl.logging.Logger;
 import com.datametl.tasks.ExampleTask;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ public class SubJobTest {
     @Test
     public void start() throws Exception {
         SubJob test = new SubJob(this.exampleTask);
+        this.exampleTask.setLogger(new Logger("test"));
         boolean result = test.start();
         assertTrue(result);
         assertTrue(test.isRunning());
@@ -29,6 +31,7 @@ public class SubJobTest {
     @Test
     public void stop() throws Exception {
         SubJob test = new SubJob(this.exampleTask);
+        this.exampleTask.setLogger(new Logger("test"));
         boolean result = test.stop();
         assertTrue(result);
         assertFalse(test.isRunning());
@@ -38,6 +41,7 @@ public class SubJobTest {
     @Test
     public void restart() throws Exception {
         SubJob test = new SubJob(this.exampleTask);
+        this.exampleTask.setLogger(new Logger("test"));
         boolean result = test.restart();
         assertTrue(result);
         assertTrue(test.isRunning());
@@ -47,6 +51,7 @@ public class SubJobTest {
     @Test
     public void isRunning() throws Exception {
         SubJob test = new SubJob(this.exampleTask);
+        this.exampleTask.setLogger(new Logger("test"));
         assertFalse(test.isRunning());
         test.start();
         assertTrue(test.isRunning());
@@ -58,6 +63,7 @@ public class SubJobTest {
     @Test
     public void successfulExecution() throws Exception {
         SubJob test = new SubJob(this.exampleTask);
+        this.exampleTask.setLogger(new Logger("test"));
         test.start();
         test.stop();
         assertEquals(JobState.SUCCESS, test.getTaskReturnCode());
@@ -67,6 +73,7 @@ public class SubJobTest {
     public void badExecution() throws Exception {
         //INFO: This test is not that good.
         SubJob test = new SubJob(this.exampleTask);
+        this.exampleTask.setLogger(new Logger("test"));
         test.start();
         assertTrue(test.isRunning());
         System.out.println("Waiting to kill...");
