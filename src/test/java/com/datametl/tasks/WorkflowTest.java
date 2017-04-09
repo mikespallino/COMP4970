@@ -72,7 +72,6 @@ public class WorkflowTest {
 
         Thread.sleep(2000);
 
-        System.out.println(manager.getLogs(jobId));
         assertNotEquals(manager.getLogs(jobId), "");
         assertEquals(manager.getJobState(jobId), JobState.SUCCESS);
     }
