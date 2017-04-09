@@ -39,7 +39,7 @@ public class WorkflowTest {
                 "    \"source_header\": \"\"\n" +
                 "  },\n" +
                 "  \"destination\": {\n" +
-                "    \"storage_type\": \"mysql\",\n" +
+                "    \"storage_type\": \"mock\",\n" +
                 "    \"host_ip\": \"127.0.0.1\",\n" +
                 "    \"password\": \"test\",\n" +
                 "    \"host_port\": \"3306\",\n" +
@@ -64,6 +64,8 @@ public class WorkflowTest {
         JobManager manager = new JobManager();
         Logger.setLogLevel(LogLevel.DEBUG);
         UUID jobId = manager.addJob("", etlPacket);
+
+        ExportDecisionFactory.addNewExporter("mock", MockExporterTask.class);
 
         manager.startJob(jobId);
         manager.stopJob(jobId);
