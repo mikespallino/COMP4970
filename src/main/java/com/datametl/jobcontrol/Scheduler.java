@@ -15,11 +15,28 @@ public class Scheduler implements Runnable {
     private Thread curThread;
     private JobManager manager;
 
+    /**
+     * Scheduler Constructor
+     * <p>
+     * Set the JobManager with the parameter and initializes current thread
+     * with the name Scheduler.
+     *
+     * @param manager JobManager
+     */
     public Scheduler(JobManager manager) {
         this.manager = manager;
         curThread = new Thread(this, "Scheduler");
     }
 
+    /**
+     * Writes workflow to a file
+     * <p>
+     * Opens the workflow directory and creates a json containing UUID
+     * of the workflow by writing ETLPacket information into it.
+     *
+     * @param jobId UUID of Job
+     * @param etlPacket JSONObject
+     */
     public void saveWorkflow(UUID jobId, JSONObject etlPacket) {
         try {
             File dir = new File("workflows");
@@ -36,6 +53,15 @@ public class Scheduler implements Runnable {
 
     }
 
+    /**
+     * Read workflow from a file
+     * <p>
+     * Opens the workflow by reading it through a StringBuffer
+     * and returning it as a JSONObject
+     *
+     * @param jobId The UUID of the workflow
+     * @return JSONObject containing information of workflow
+     */
     public JSONObject readWorkflow(UUID jobId) {
         try {
             File f = new File("workflows/" + jobId.toString() + ".json");
@@ -54,6 +80,13 @@ public class Scheduler implements Runnable {
         }
     }
 
+    /**
+     * Reloads saved workflows
+     * <p>
+     * In the case of when DataMETL is restarted, it will
+     * reload all the saved workflows from disk and determines
+     * the jobState.
+     */
     public void readSavedWorkflows() {
         try {
             File dir = new File("workflows");
@@ -98,6 +131,12 @@ public class Scheduler implements Runnable {
 
     }
 
+    /**
+     * Determines whether or not a workflow should start
+     * <p>
+     * Reads the workflows saved on disk and reads the time to
+     * determine if it should start
+     */
     public void poll() {
         try {
             while(true) {
@@ -171,14 +210,23 @@ public class Scheduler implements Runnable {
         }
     }
 
+    /**
+     * Starts a thread
+     */
     public void start() {
         curThread.start();
     }
 
+    /**
+     *
+     */
     public void run() {
         poll();
     }
 
+    /**
+     * Kills current thread
+     */
     public void kill() {
         curThread.interrupt();
     }

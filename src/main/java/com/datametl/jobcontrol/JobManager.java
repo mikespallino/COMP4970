@@ -19,6 +19,10 @@ public class JobManager implements Runnable {
     private Scheduler scheduler;
     private Logger log;
 
+    /**
+     * JobManager Constructor
+     *
+     */
     public JobManager() {
         jobs = new HashMap<UUID, Job>();
         namedJobs = new HashMap<String, UUID>();
@@ -31,6 +35,14 @@ public class JobManager implements Runnable {
     }
 
     //Path & file type has been altered
+
+    /**
+     * Adds a Job
+     *
+     * @param name name of Job
+     * @param uiData JSONObject
+     * @return new UUID
+     */
     public UUID addJob(String name, JSONObject uiData) {
         UUID newId = UUID.randomUUID();
         Logger newLogger = getNewLogger(newId);
@@ -58,6 +70,13 @@ public class JobManager implements Runnable {
         return newId;
     }
 
+    /**
+     * Restarts a job based on name
+     *
+     * @param name name of Job
+     * @param uiData JSONObject
+     * @return UUID of Job
+     */
     public UUID resubmitJob(String name, JSONObject uiData) {
         System.out.println(name);
         UUID jobId = namedJobs.get(name);
@@ -89,6 +108,13 @@ public class JobManager implements Runnable {
         return jobId;
     }
 
+    /**
+     * Adds a Job to the list with state
+     *
+     * @param jobId UUID of job
+     * @param packet JSONObject
+     * @param state JobState
+     */
     public void addJobWithStatus(UUID jobId, JSONObject packet, JobState state) {
         Vector<SubJob> subJobs = new Vector<SubJob>();
         Job job = new Job(subJobs, 3, getNewLogger(jobId));
@@ -100,26 +126,61 @@ public class JobManager implements Runnable {
         jobs.put(jobId, job);
     }
 
+    /**
+     * Removes a Job
+     *
+     * @param oldJobId UUID of Job
+     */
     public void removeJob(UUID oldJobId) {
         jobs.remove(oldJobId);
     }
 
+    /**
+     * Starts a job
+     *
+     * @param jobId UUID of Job
+     * @return true or false
+     */
     public boolean startJob(UUID jobId) {
         return jobs.get(jobId).start();
     }
 
+    /**
+     * Kills a Job
+     *
+     * @param jobId UUID of Job
+     * @return true or false
+     */
     public boolean killJob(UUID jobId) {
         return jobs.get(jobId).kill();
     }
 
+    /**
+     * Stops a Job
+     *
+     * @param jobId UUID of Job
+     * @return true or false
+     */
     public boolean stopJob(UUID jobId) {
         return jobs.get(jobId).stop();
     }
 
+    /**
+     * Return the jobID from ETLPacket in JSONObject
+     *
+     * @param jobId UUID
+     * @return jobID in JSONObject
+     */
     public JSONObject getJobETLPacket(UUID jobId) {
         return jobs.get(jobId).getETLPacket();
     }
 
+    /**
+     * Starts the process of JobManager
+     * <p>
+     * Goes through a list of Jobs and logs the status of each Job
+     *
+     */
     public void run() {
         int jobIndex = 0;
         int jobSize = jobs.size();
@@ -176,6 +237,11 @@ public class JobManager implements Runnable {
         }
     }
 
+    /**
+     * Terminates JobManager after saving jobs to disk
+     *
+     * @return true
+     */
     public boolean kill() {
         for(UUID id: jobs.keySet()) {
             Job j = jobs.get(id);
@@ -190,22 +256,50 @@ public class JobManager implements Runnable {
         return true;
     }
 
+    /**
+     * Return Map of UUID and Jobs
+     *
+     * @return map of UUID and Jobs
+     */
     public Map<UUID, Job> getJobs() {
         return jobs;
     }
 
+    /**
+     * Returns the JobState of a Job
+     *
+     * @param id UUID of a Job
+     * @return JobState
+     */
     public JobState getJobState(UUID id) {
         return jobs.get(id).getState();
     }
 
+    /**
+     * Returns a Job by name
+     *
+     * @param name name of a Job
+     * @return Job
+     */
     public Job getJobByName(String name) {
         return jobs.get(namedJobs.get(name));
     }
 
+    /**
+     * Returns a map of name and Jobs
+     *
+     * @return namedJobs
+     */
     public Map<String, UUID> getNamedJobs() {
         return namedJobs;
     }
 
+    /**
+     * Restart specific Workflow with new configurations
+     *
+     * @param jobid UUID of a Job
+     * @param packet JSONObject of new user configurations
+     */
     public void resubmit(UUID jobid, JSONObject packet) {
         removeJob(jobid);
         Logger newLogger = new Logger(jobid.toString());
@@ -220,6 +314,10 @@ public class JobManager implements Runnable {
         jobs.put(jobid, job);
     }
 
+    /**
+     * Kills the Scheduler
+     *
+     */
     public void killScheduler() {
         scheduler.kill();
     }
@@ -229,6 +327,12 @@ public class JobManager implements Runnable {
         return newLogger;
     }
 
+    /**
+     * Get logs of Job
+     *
+     * @param jobId UUID of Job
+     * @return string containing the logs
+     */
     public String getLogs(UUID jobId) {
         Job j = jobs.get(jobId);
         if (j!= null) {
