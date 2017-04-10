@@ -43,7 +43,7 @@ public class ExtractTask implements Task{
     /**
      * Constructor
      * <p>
-     * Sets the returnCode to NOT_STARTED
+     * Sets the Log
      */
     public ExtractTask(Logger log) {
         this.log = log;
@@ -57,6 +57,8 @@ public class ExtractTask implements Task{
      * the necessary method for extraction of file. After succession,
      * it will create a new RulesEngineTask and pass the ETLPacket.
      * Then it empties the content array in the ETLPacket.
+     *
+     * @see Task
      */
     public void apply() {
 
