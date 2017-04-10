@@ -21,7 +21,7 @@ public class Scheduler implements Runnable {
      * Set the JobManager with the parameter and initializes current thread
      * with the name Scheduler.
      *
-     * @param manager
+     * @param manager JobManager
      */
     public Scheduler(JobManager manager) {
         this.manager = manager;
@@ -34,8 +34,8 @@ public class Scheduler implements Runnable {
      * Opens the workflow directory and creates a json containing UUID
      * of the workflow by writing ETLPacket information into it.
      *
-     * @param jobId
-     * @param etlPacket
+     * @param jobId UUID of Job
+     * @param etlPacket JSONObject
      */
     public void saveWorkflow(UUID jobId, JSONObject etlPacket) {
         try {

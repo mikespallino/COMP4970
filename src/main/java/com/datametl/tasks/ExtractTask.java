@@ -44,6 +44,8 @@ public class ExtractTask implements Task{
      * Constructor
      * <p>
      * Sets the Log
+     *
+     * @param log log
      */
     public ExtractTask(Logger log) {
         this.log = log;
@@ -118,7 +120,7 @@ public class ExtractTask implements Task{
     /**
      * Sets the parent of ExtractTask
      *
-     * @param parent PLACEHOLDER
+     * @param parent parent of SubJob
      */
     public void setParent(SubJob parent) {
         this.parent = parent;
