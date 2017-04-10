@@ -39,10 +39,14 @@ public class ExportMYSQLTask implements ExportInterface, Task {
         username = connInfo.getString("username");
         password = connInfo.getString("password");
         try {
+            Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(host_address, username, password);
         } catch (SQLException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
+        } catch (ClassNotFoundException ex) {
+            log.error(ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 

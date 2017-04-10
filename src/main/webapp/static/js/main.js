@@ -24,6 +24,8 @@ $(document).ready(function() {
                                 <option value="add">ADD</option> \
                                 <option value="sub">SUB</option> \
                                 <option value="hash">HASH</option> \
+                                <option value="ucase">UPPER</option> \
+                                <option value="lcase">LOWER</option> \
                              </select> \
                              <input type="text" class="form-control" name="transformValue{0}" id="transformValue{0}" placeholder="Value"> \
                              <input type="text" class="form-control" name="transformDestinationField{0}" id="transformDestinationField{0}" placeholder="New Field (optional)"> \
@@ -57,7 +59,7 @@ $(document).ready(function() {
                        <textarea id="logs" rows=10 class="form-control" style="width:100%;" disabled></textarea> \
                    </div>';
 
-    var workflowHtml = '<div id="{0}"><button id="button-{0}"><h5>{0}</h5></button></div>';
+    var workflowHtml = '<div id="{0}"><button id="button-{0}" style="width:100%;"><h5>{0}</h5></button></div>';
 
     $('#transform-new').click(function () {
         $(transformHtml.format(transformCount)).appendTo('#transforms');
@@ -206,9 +208,16 @@ $(document).ready(function() {
                                         $('#destination-config').find('*').prop('disabled', false);
                                         $('#execution-config').find('*').prop('disabled', false);
 
-                                        $('#transformGroup'+transformPacketCount).find('*').prop('disabled', false);
-                                        $('#mappingGroup'+mappingPacketCount).find('*').prop('disabled', false);
-                                        $('#filterGroup'+filterPacketCount).find('*').prop('disabled', false);
+                                        var count = 0;
+                                        for(count = 0; count < transformPacketCount; count++){
+                                            $('#transformGroup'+count).find('*').prop('disabled', false);
+                                        }
+                                        for(count = 0; count < mappingPacketCount; count++){
+                                            $('#mappingGroup'+count).find('*').prop('disabled', false);
+                                        }
+                                        for(count = 0; count < filterPacketCount; count++){
+                                            $('#filterGroup'+count).find('*').prop('disabled', false);
+                                        }
 
                                         $('#executeButton').click(function () {
                                                 $.ajax({
@@ -278,7 +287,7 @@ $(document).ready(function() {
                                 $('#source_type').val(source['file_type'].toLowerCase());
                                 $('#destination_type').val(destination['storage_type']);
                                 $('#destination_port').val(destination['host_port']);
-                                $('#destination_ip').val(destination['host_port']);
+                                $('#destination_ip').val(destination['host_ip']);
                                 $('#destination_location').val(destination['destination_location']);
                                 $('#destination_schema').val(data['destination_header']);
                                 $('#username').val(destination['username']);
