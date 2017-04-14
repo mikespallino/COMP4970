@@ -219,7 +219,7 @@ $(document).ready(function() {
                                             $('#filterGroup'+count).find('*').prop('disabled', false);
                                         }
 
-                                        $('#executeButton').click(function () {
+                                        $('#executeButton').unbind('click').click(function () {
                                                 $.ajax({
                                                             url: "/DataMETL/resubmit",
                                                             success: function(result){

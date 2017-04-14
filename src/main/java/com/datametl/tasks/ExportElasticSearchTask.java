@@ -44,7 +44,7 @@ public class ExportElasticSearchTask implements ExportInterface, Task {
           JSONObject connInfo = etlPacket.getJSONObject("destination");
           host_address = connInfo.getString("host_ip");
           host_port = connInfo.getInt("host_port");
-          String[] tmp = connInfo.getString("destination_location").split(".");
+          String[] tmp = connInfo.getString("destination_location").split("\\.");
           cluster = tmp[0];
           index = tmp[1];
           type = tmp[2];
