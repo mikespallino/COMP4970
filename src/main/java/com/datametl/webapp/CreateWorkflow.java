@@ -21,6 +21,17 @@ public class CreateWorkflow extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
 
+    /**
+     * POST request for creating a workflow.
+     * <p>
+     * usage: POST localhost:8080/DataMETL/createworkflow
+     *        send JSON data from the UI to be put into an ETLPacket.
+     *
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doPost(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {

@@ -12,12 +12,22 @@ import java.io.PrintWriter;
 import java.util.UUID;
 
 /**
- *
+ * Servlet for getlogs
  */
 @WebServlet("/getlogs")
 public class GetLogs extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * GET request for retrieving logs for a job
+     * <p>
+     * usage: localhost:8080/DataMETL/getlogs?jobid=UUID4
+     *
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
