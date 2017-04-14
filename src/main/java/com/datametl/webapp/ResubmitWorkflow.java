@@ -22,6 +22,17 @@ import java.util.UUID;
 public class ResubmitWorkflow extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * POST request for resubmitting a job.
+     * <p>
+     * usage: localhost:8080/DataMETL/resubmit
+     *        send JSON data from the UI to be put into an ETLPacket.
+     *
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doPost(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {

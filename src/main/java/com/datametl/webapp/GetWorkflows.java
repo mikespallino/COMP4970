@@ -21,6 +21,23 @@ import java.util.UUID;
 public class GetWorkflows extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * GET request for retrieving workflow information
+     * <p>
+     * usage: localhost:8080/DataMETL/getworkflows?status=FAILED
+     *          RETURNS all jobs matching the status provided
+     *
+     *        localhost:8080/DataMETL/getworkflows?jobid=UUID4
+     *          RETURNS ETLPacket for the Job with the provided UUID
+     *
+     *        localhost:8080/DataMETL/getworkflows?jobid=NAME
+     *          RETURNS ETLPacket for the Job with the provided NAME
+     *
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {

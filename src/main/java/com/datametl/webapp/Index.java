@@ -20,6 +20,12 @@ public class Index extends HttpServlet {
 
     public static JobManager manager;
 
+    /**
+     * Creates a JobManager to be used for the duration of the application.
+     * This is called on initialization.
+     *
+     * @throws ServletException
+     */
     @Override
     public void init() throws ServletException {
         super.init();
